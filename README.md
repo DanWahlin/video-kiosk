@@ -6,11 +6,13 @@ the list at the same place.
 
 ![The kiosk home screen: a 3D carousel of folder cards](docs/images/home.jpg)
 
-- Node.js (Express) with plain HTML, CSS, and JavaScript. No build step.
+- Node.js (Express) with plain HTML, CSS, and JavaScript. No build step to run it locally.
 - Themes: **Dark**, **Light**, **GitHub Dark**, **GitHub Light**, **VS Code Dark**, and **VS Code Light**.
-- Closed captions from `.vtt` files, with a **CC On/Off** button in the player.
+- Closed captions from `.vtt` files, with **CC** and sound on/off buttons in the player.
+- Loop video playback (a folder plays like a playlist) and a **Mute videos** setting.
 - Touch, mouse, and keyboard: tap or click any folder card, swipe or drag the carousel, or use the arrow keys.
-- Works offline. Fonts, icons, and videos are local.
+- Works offline with `npm start`: fonts, icons, and videos are local. It can also run as a
+  static site on Azure, with the videos in Blob Storage (see [Deploy to Azure](#deploy-to-azure)).
 
 ## Quick start
 
@@ -34,9 +36,9 @@ Requires:
    behavior (idle reset time, attract mode, loop video playback, mute videos, captions default,
    caption size).
 4. Select **Launch kiosk**. It opens in full screen. **Esc** exits full screen only; a
-   **Full screen** button then shows in the upper right. To return to the settings, select
-   the gear on the home screen, press and hold the logo or the title for 3 seconds, or press
-   **Ctrl+Alt+S**.
+   **Full screen** button then shows at the top right. To return to the settings, select the
+   gear in the top-right corner of the home screen, press and hold the logo or the title for
+   3 seconds, or press **Ctrl+Alt+S**.
 
 ![The settings page: videos source, theme, and kiosk behavior](docs/images/settings.jpg)
 
@@ -61,14 +63,15 @@ reload shows it at once.
   reset never stops a playing video, so the loop runs until someone stops it.
 - **Mute videos:** when this setting is on, every video starts without sound. Turn captions on
   so viewers can still follow along.
-- **Idle:** after the idle time, the kiosk returns to the start screen and resets captions and
-  watched checks. It never stops a video that is playing. With attract mode on, the carousel
+- **Idle:** after the idle time, the kiosk returns to the start screen and resets captions,
+  sound, and watched checks to the settings. It never stops a video that is playing. With attract mode on, the carousel
   turns slowly when nobody uses the kiosk.
 - **Keyboard:** arrow keys turn the carousel, **Enter** opens or plays, **Backspace** goes back,
-  and **Space** pauses.
+  **Space** pauses or plays, and **Ctrl+Alt+S** opens the settings.
 - **macOS:** in full screen, the menu bar shows when the pointer moves to the top edge. This is
-  normal macOS behavior, and the page stays in full screen. The kiosk hides the pointer after
-  3 seconds.
+  normal macOS behavior, and the page stays in full screen. The kiosk moves its corner buttons
+  down in full screen on a Mac, so the menu bar does not cover them, and it hides the pointer
+  after 3 seconds.
 
 ## Start a browser in kiosk mode
 
@@ -94,8 +97,8 @@ Start-Process chrome -ArgumentList '--kiosk','--user-data-dir=C:\kiosk\chrome','
 Start-Process msedge -ArgumentList '--kiosk','--edge-kiosk-type=fullscreen','--no-first-run','--user-data-dir=C:\kiosk\edge','http://localhost:3000/#kiosk'
 ```
 
-In browser kiosk mode, select the gear on the home screen (or hold the logo for 3 seconds) to open the settings. To close the browser, press
-**Cmd+Q** (macOS) or **Alt+F4** (Windows).
+In browser kiosk mode, select the gear on the home screen (or hold the logo for 3 seconds) to
+open the settings. To close the browser, press **Cmd+Q** (macOS) or **Alt+F4** (Windows).
 
 ## Catalog JSON
 
@@ -108,7 +111,7 @@ Catalog file names end with the month and year they were made, as `<name>-<month
 {
   "$schema": "../schema/kiosk-catalog.schema.json",
   "title": "Universe on the Road",
-  "subtitle": "Self-Serve Videos",
+  "subtitle": "Videos",
   "icon": "assets/GitHub_Invertocat_White.svg",
   "iconLight": "assets/GitHub_Invertocat_Black.svg",
   "folders": [
@@ -139,7 +142,7 @@ Catalog file names end with the month and year they were made, as `<name>-<month
 | `folders[].icon` | No | Octicon name or image. Default: `file-directory`. Use the name without the size (`rocket`, not `rocket-24`). |
 | `videos[].title`, `description`, `path` | Yes | `path` is a file path or an `http(s)` URL. |
 | `videos[].captions` | No | A `.vtt` file. |
-| `videos[].thumbnail`, `duration` | No | If you omit them, the server makes them with ffmpeg. |
+| `videos[].thumbnail`, `duration` | No | If you omit them, the server makes them with ffmpeg (`npm run azure:catalog` adds them for Azure). |
 
 Relative paths start from the folder that contains the catalog. Validate a catalog with:
 
@@ -291,22 +294,30 @@ the same computer, and it checks the `Host` header to block DNS rebinding. The m
 serve only files that the loaded catalog names. If you set `HOST=0.0.0.0` to show the kiosk
 on another device, the settings page still works only on the server computer.
 
+On the static site, anyone with the site's address can open the settings page, but the
+settings are saved only in that browser. The Blob Storage container allows anonymous read
+access, so anyone with a video's URL can watch it. Do not upload videos that must stay private.
+
 ## Project structure
 
 ```
-server.js                    Express server and API
+server.js                    Express server and API (npm start)
 lib/                         Catalog validation, folder mode, ffmpeg media, settings, icons, QuickXorHash
 public/                      Settings page and kiosk (HTML, CSS, JavaScript modules)
 schema/                      Catalog JSON schema
-tools/validate.js            Catalog validation CLI
-tools/sharepoint-catalog.js  Builds a catalog from a SharePoint listing and the board
-tools/azure-catalog.js       Makes a copy of a catalog with Blob Storage URLs and thumbnails
-tools/build-static.js        Builds the static site in dist/
-tools/faststart.js           Copies MP4s with the index moved to the start, for streaming
-static-site.json             Catalogs and default settings for the static site
-catalogs/                    Catalogs and logo assets
-videos/                      Your video files (not in Git)
+catalogs/                    Catalogs (<name>-<month>-<year>.json) and logo assets
+static-site.json             Catalogs, media version, and default settings for the static site
+tools/validate.js            Catalog validation CLI (npm run validate)
+tools/sharepoint-catalog.js  Builds a catalog from a SharePoint listing and the board (npm run catalog:sharepoint)
+tools/azure-catalog.js       Copies a catalog with Blob Storage URLs and thumbnails (npm run azure:catalog)
+tools/faststart.js           Copies MP4s with the index moved to the start (npm run azure:faststart)
+tools/build-static.js        Builds the static site in dist/ (npm run build:static)
+.github/workflows/           Deploys the static site to Azure on each push to main
+.github/skills/              Copilot skill: build a catalog from SharePoint (read only)
 docs/images/                 README screenshots
+videos/                      Your video files (not in Git)
+data/                        Local settings and the thumbnail cache (not in Git)
+dist/                        The static site build (not in Git)
 ```
 
 The GitHub Invertocat files in `catalogs/assets/` come from the
