@@ -387,7 +387,7 @@
           "description": "A narrated walkthrough (about 3 min 24 s) of delegating cost center budgets in GitHub Enterprise. Today, enterprise owners and billing managers see all billing data. The video shows an enterprise owner creating a custom role with the permission to create, edit, and delete budgets for a cost center, and assigning it to a person for one cost center. Then it shows what that cost center manager sees: a shorter billing menu, only their own cost center, a new Actions budget, and user budgets with AI usage. It also shows a view-only role that can view budgets and usage but can't edit them, and that enterprise owners keep full access.",
           "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/GitHub%20Enterprise%20-%20Scale%20AI-powered%20development%20with%20confidence/budget-delegation.mp4",
           "captions": "https://ghuniverseroadtrip.blob.core.windows.net/videos/GitHub%20Enterprise%20-%20Scale%20AI-powered%20development%20with%20confidence/budget-delegation.vtt",
-          "duration": 203.93,
+          "duration": 140.64,
           "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/GitHub%20Enterprise%20-%20Scale%20AI-powered%20development%20with%20confidence/budget-delegation.jpg"
         },
         {

@@ -3,7 +3,7 @@
     "catalogs/universe-on-the-road-azure-11-2026.json",
     "catalogs/ignite-azure-11-2026.json"
   ],
-  "mediaVersion": 2,
+  "mediaVersion": 3,
   "defaults": {
     "theme": "github-dark",
     "idleSeconds": 120,
