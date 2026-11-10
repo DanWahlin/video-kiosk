@@ -170,53 +170,119 @@ Select **Download catalog JSON** on the settings page to get a catalog that you 
 The kiosk can also run as a static site on [Azure Static Web Apps](https://learn.microsoft.com/azure/static-web-apps/),
 with the videos in Azure Blob Storage. On a static site, the settings page saves the
 settings in the browser. **Browse** lists the catalog JSON files in the build; there is no
-folder mode. The live copy is at
-https://purple-sky-020d7461e.6.azurestaticapps.net/ (resource group `github-universe-roadtrip`).
+folder mode. The live copy is at https://purple-sky-020d7461e.6.azurestaticapps.net/.
 
-1. **Make a catalog with Blob Storage URLs, thumbnails, and video lengths** (needs ffmpeg).
-   Each file keeps its path under `videos/`:
-   ```bash
-   npm run azure:catalog -- --catalog catalogs/universe-on-the-road-11-2026.json \
-     --base-url https://ghuniverseroadtrip.blob.core.windows.net/videos \
-     --out catalogs/universe-on-the-road-azure-11-2026.json
-   ```
-2. **Upload the files** to a container with anonymous read access (`--public-access blob`) and
-   two blob service settings that make the videos stream:
-   - **Default service version.** A browser does not send the `x-ms-version` header, so without
-     a default Blob Storage answers with a 2009 API version that does not return
-     `Accept-Ranges: bytes`. Then the browser cannot fetch parts of a video to stream or seek:
-     `az storage account blob-service-properties update --default-service-version 2026-02-06`.
-   - **CORS** for `GET`, `HEAD`, and `OPTIONS` that exposes `Accept-Ranges`, `Content-Range`,
-     `Content-Length`, `Content-Type`, and `ETag` (the browser also needs CORS for captions).
+You need the [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) (`az login`),
+the [GitHub CLI](https://cli.github.com/) (`gh auth login`), ffmpeg, and push access to your
+copy of this repository.
 
-   Upload each file with its content type. Run `npm run azure:faststart` first: it copies each
-   MP4 whose index is at the end of the file to `data/azure/faststart` with the index at the
-   start (no re-encoding), so it starts playing at once. Upload those copies after the others.
-   Your account needs the **Storage Blob Data Contributor** role:
-   ```bash
-   az storage blob upload-batch --account-name ghuniverseroadtrip -d videos -s videos \
-     --pattern "*/*.mp4" --content-type video/mp4 --auth-mode login --overwrite true
-   az storage blob upload-batch --account-name ghuniverseroadtrip -d videos -s videos \
-     --pattern "*/*.vtt" --content-type "text/vtt; charset=utf-8" --auth-mode login --overwrite true
-   az storage blob upload-batch --account-name ghuniverseroadtrip -d videos -s data/azure/faststart \
-     --pattern "*/*.mp4" --content-type video/mp4 --auth-mode login --overwrite true
-   az storage blob upload-batch --account-name ghuniverseroadtrip -d videos -s data/azure/thumbnails \
-     --destination-path thumbnails --content-type image/jpeg --auth-mode login --overwrite true
-   ```
-3. **List the catalogs in `static-site.json`.** It also sets the site's default settings
-   (theme, idle time, loop playback, mute, captions). Each browser can change them on the
-   settings page. After you replace files in Blob Storage, increase `mediaVersion`: the build
-   adds it to the media URLs, so browsers do not use copies that they stored before.
-4. **Push to `main`.** The GitHub Actions workflow
-   ([`.github/workflows/deploy-static-web-app.yml`](.github/workflows/deploy-static-web-app.yml))
-   runs `npm run build:static` and deploys `dist/`. It uses the Static Web App's deployment
-   token in the `AZURE_STATIC_WEB_APPS_API_TOKEN` repository secret:
-   ```bash
-   gh secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body "$(az staticwebapp secrets list \
-     -n github-universe-roadtrip -g github-universe-roadtrip --query properties.apiKey -o tsv)"
-   ```
-   To build and look at the site locally, run `npm run build:static` and serve `dist/` with
-   any static file server.
+### 1. Create the Azure resources
+
+Set names for your resources. The storage account name must be 3–24 lowercase letters and
+numbers, and unique in Azure. On the Free plan, Static Web Apps is available in `westus2`,
+`centralus`, `eastus2`, `westeurope`, and `eastasia`.
+
+```bash
+RG=my-video-kiosk          # resource group
+LOCATION=westus2
+STORAGE=myvideokiosk123    # storage account
+CONTAINER=videos
+SWA=my-video-kiosk         # Static Web App
+```
+
+Create the resource group, a storage account, and a container that anyone can read (the
+kiosk plays the videos without a sign-in):
+
+```bash
+az group create -n $RG -l $LOCATION
+az storage account create -n $STORAGE -g $RG -l $LOCATION --sku Standard_LRS --kind StorageV2 \
+  --access-tier Hot --https-only true --min-tls-version TLS1_2 --allow-blob-public-access true
+az storage container-rm create --storage-account $STORAGE -g $RG -n $CONTAINER --public-access blob
+```
+
+Set the two blob service settings that make the videos stream:
+
+- **Default service version.** A browser does not send the `x-ms-version` header, so without
+  a default, Blob Storage answers with a 2009 API version that does not return
+  `Accept-Ranges: bytes`. Then the browser cannot fetch parts of a video to stream or seek.
+- **CORS** that exposes the streaming headers. The browser also needs CORS for captions.
+
+```bash
+az storage account blob-service-properties update --account-name $STORAGE -g $RG \
+  --default-service-version 2026-02-06
+az storage account blob-service-properties cors-rule add --account-name $STORAGE -g $RG \
+  --allowed-origins "*" --allowed-methods GET HEAD OPTIONS --allowed-headers "*" \
+  --exposed-headers Accept-Ranges Content-Range Content-Length Content-Type ETag --max-age 3600
+```
+
+Give your account permission to upload (with Microsoft Entra ID, not account keys). The role
+can take a few minutes to apply. Then create the Static Web App:
+
+```bash
+az role assignment create --role "Storage Blob Data Contributor" \
+  --assignee-object-id "$(az ad signed-in-user show --query id -o tsv)" --assignee-principal-type User \
+  --scope "$(az storage account show -n $STORAGE -g $RG --query id -o tsv)"
+az staticwebapp create -n $SWA -g $RG -l $LOCATION --sku Free --query defaultHostname -o tsv
+```
+
+The last command shows the site's address.
+
+### 2. Make a catalog that uses Blob Storage
+
+Put the videos in `videos/` and make a catalog for them (see [Catalog JSON](#catalog-json)).
+Then make a copy of it with Blob Storage URLs. The tool also makes a thumbnail for each video
+(in `data/azure/thumbnails`) and adds each video's length. Each file keeps its path under
+`videos/`:
+
+```bash
+npm run azure:catalog -- --catalog catalogs/universe-on-the-road-11-2026.json \
+  --base-url https://$STORAGE.blob.core.windows.net/$CONTAINER \
+  --out catalogs/universe-on-the-road-azure-11-2026.json
+```
+
+### 3. Upload the files
+
+Upload each file type with its content type. `npm run azure:faststart` copies each MP4 whose
+index is at the end of the file to `data/azure/faststart`, with the index at the start (no
+re-encoding), so it starts playing at once. Upload those copies after the others, so they
+replace them:
+
+```bash
+npm run azure:faststart
+UPLOAD="--account-name $STORAGE -d $CONTAINER --auth-mode login --overwrite true --max-connections 8"
+az storage blob upload-batch $UPLOAD -s videos --pattern "*/*.mp4" --content-type video/mp4
+az storage blob upload-batch $UPLOAD -s videos --pattern "*/*.vtt" --content-type "text/vtt; charset=utf-8"
+az storage blob upload-batch $UPLOAD -s data/azure/faststart --pattern "*/*.mp4" --content-type video/mp4
+az storage blob upload-batch $UPLOAD -s data/azure/thumbnails --destination-path thumbnails \
+  --content-type image/jpeg
+```
+
+For nested folders, add more patterns (for example, `"*/*/*.mp4"`).
+
+### 4. Build and deploy the site
+
+List the Azure catalogs in `static-site.json`. It also sets the site's default settings
+(theme, idle time, loop playback, mute, captions); each browser can change them on the
+settings page. After you replace files in Blob Storage, increase `mediaVersion`: the build
+adds it to the media URLs, so browsers do not use copies that they stored before.
+
+The GitHub Actions workflow
+([`.github/workflows/deploy-static-web-app.yml`](.github/workflows/deploy-static-web-app.yml))
+runs `npm run build:static` and deploys `dist/` on every push to `main`. Save the Static Web
+App's deployment token as a repository secret, then push:
+
+```bash
+gh secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body "$(az staticwebapp secrets list \
+  -n $SWA -g $RG --query properties.apiKey -o tsv)"
+git push
+```
+
+To deploy without GitHub Actions, run `npm run build:static`, then
+`npx @azure/static-web-apps-cli deploy ./dist --env production --deployment-token <token>`.
+To look at the site locally first, serve `dist/` with any static file server.
+
+**Costs:** the Free plan of Static Web Apps costs nothing. Blob Storage costs about $0.02 per GB
+a month to store, and about $0.08 per GB that viewers watch after the first 100 GB a month.
 
 ## Security
 
