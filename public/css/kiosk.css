@@ -365,28 +365,37 @@ button.pill:active {
   z-index: 10;
   font-size: 1.15em;
 }
-/* Gear in the top-right corner of the home screen. It opens the settings. */
+/* Gear in the top-right corner of the home screen, out of the way. It opens the settings. */
 .settings-btn {
   position: absolute;
-  top: 1.9em;
-  right: 2.6em;
+  top: 0.8em;
+  right: 0.8em;
   z-index: 10;
-  font-size: 1.15em;
-  width: 2.6em;
-  height: 2.6em;
+  width: 2.4em;
+  height: 2.4em;
   padding: 0;
   justify-content: center;
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+.settings-btn:hover,
+.settings-btn:focus-visible,
+.settings-btn:active {
+  opacity: 1;
 }
 .settings-btn .icon {
-  width: 1.3em;
-  height: 1.3em;
+  width: 1.15em;
+  height: 1.15em;
 }
 .kiosk:has(#home[hidden]) .settings-btn {
   display: none;
 }
 /* On the home screen, Full screen sits to the left of the gear. */
 .kiosk:has(#home:not([hidden])) .fs-btn {
-  right: calc(2.6em + 2.6em + 0.8em);
+  /* Same center line as the gear. This button's font is 1.15 times larger, so divide. */
+  top: calc((0.8em + 1.2em) / 1.15);
+  translate: 0 -50%;
+  right: calc((0.8em + 2.4em + 0.6em) / 1.15);
 }
 /* Holding the logo or title opens the settings. Show that the hold is counting. */
 .brand-icon,
@@ -600,9 +609,8 @@ button.pill:active {
   box-shadow: 0 0 1em rgb(var(--active) / calc(0.6 * var(--glow)));
 }
 .thumb .play .icon {
-  width: 1.2em;
-  height: 1.2em;
-  margin-left: 0.15em;
+  width: 1.3em;
+  height: 1.3em;
 }
 .thumb .dur {
   position: absolute;
@@ -866,9 +874,8 @@ button.pill:active {
   box-shadow: 0 0 2em rgb(var(--active) / 0.6);
 }
 .big-play .icon {
-  width: 3em;
-  height: 3em;
-  margin-left: 0.3em;
+  width: 3.2em;
+  height: 3.2em;
 }
 .player-error {
   position: absolute;

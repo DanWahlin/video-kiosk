@@ -9,7 +9,7 @@ const CURSOR_HIDE_MS = 3_000;
 const SETTINGS_HOLD_MS = 3_000;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
-export function createKiosk({ onExit }) {
+export function createKiosk({ backend, onExit }) {
   const root = $('#kiosk');
   const home = $('#home');
   const folderScreen = $('#folder');
@@ -35,7 +35,7 @@ export function createKiosk({ onExit }) {
     onOpen: (i) => openFolder(i),
     onIndex: (i) => $$('button', homeDots).forEach((d, k) => d.classList.toggle('is-active', k === i)),
   });
-  const player = createPlayer($('#player'), { onClose: onPlayerClosed, onCaptions: (on) => (captionsOn = on) });
+  const player = createPlayer($('#player'), { onClose: onPlayerClosed, onCaptions: (on) => (captionsOn = on), onEnded: playNext });
 
   $('.nav.prev', home).addEventListener('click', () => carousel.prev());
   $('.nav.next', home).addEventListener('click', () => carousel.next());
@@ -43,10 +43,7 @@ export function createKiosk({ onExit }) {
 
   // ---- Loading ----
   async function load() {
-    const res = await fetch('/api/catalog', { cache: 'no-store' });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'The catalog did not load.');
-    catalog = data;
+    catalog = await backend.getCatalog();
     applyTheme(catalog.settings.theme);
     player.setCaptionSize(catalog.settings.captionSize);
     const lightTheme = catalog.settings.theme.endsWith('light');
@@ -240,15 +237,27 @@ export function createKiosk({ onExit }) {
     player.open(catalog.folders[folderIndex].videos[vi], { captions: captionsOn });
   }
 
+  // Loop playback: when a video ends, the next one in the folder plays, and after the
+  // last video the first plays again, until a viewer selects Back.
+  function playNext() {
+    if (!catalog.settings.loopPlayback || folderIndex < 0) return false;
+    markWatched(currentRow);
+    playVideo((currentRow + 1) % catalog.folders[folderIndex].videos.length);
+    return true;
+  }
+
+  function markWatched(vi) {
+    watched.add(`${folderIndex}:${vi}`);
+    const row = $$('.vrow', list)[vi];
+    if (row && !$('.watched', row)) $('.thumb', row).append(watchedBadge());
+  }
+
   function onPlayerClosed(reason) {
     if (reason === 'home' || reason === 'exit') return;
     noteInput(); // Watching counts as activity, so the idle timer starts again from here.
     if (folderIndex < 0) return;
+    if (reason === 'ended') markWatched(currentRow);
     const row = $$('.vrow', list)[currentRow];
-    if (reason === 'ended') {
-      watched.add(`${folderIndex}:${currentRow}`);
-      if (row && !$('.watched', row)) $('.thumb', row).append(watchedBadge());
-    }
     row?.scrollIntoView({ block: 'nearest' });
     row?.focus({ preventScroll: true });
   }

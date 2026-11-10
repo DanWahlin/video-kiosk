@@ -1,11 +1,13 @@
 import { $, loadUiIcons } from './dom.js';
+import { createBackend } from './backend.js';
 import { createAdmin } from './admin.js';
 import { createKiosk } from './kiosk.js';
 
-await loadUiIcons();
+const [backend] = await Promise.all([createBackend(), loadUiIcons()]);
 
-const admin = createAdmin({ onLaunch: () => kiosk.launch({ fullscreen: true }) });
+const admin = createAdmin({ backend, onLaunch: () => kiosk.launch({ fullscreen: true }) });
 const kiosk = createKiosk({
+  backend,
   onExit: () => {
     if (location.hash) history.replaceState(null, '', location.pathname);
     admin.show();

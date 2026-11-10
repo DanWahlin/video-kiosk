@@ -11,7 +11,9 @@
   "scripts": {
     "start": "node server.js",
     "validate": "node tools/validate.js",
-    "catalog:sharepoint": "node tools/sharepoint-catalog.js"
+    "catalog:sharepoint": "node tools/sharepoint-catalog.js",
+    "azure:catalog": "node tools/azure-catalog.js",
+    "build:static": "node tools/build-static.js"
   },
   "dependencies": {
     "@fontsource-variable/mona-sans": "^5.3.0",

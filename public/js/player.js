@@ -4,7 +4,8 @@ const HIDE_CONTROLS_MS = 3000;
 const PAUSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
 
 // Full-screen video overlay with large, touch-friendly controls.
-export function createPlayer(root, { onClose, onCaptions }) {
+// onEnded() returns true when it starts the next video itself (loop playback).
+export function createPlayer(root, { onClose, onCaptions, onEnded }) {
   const video = $('video', root);
   const toggle = $('.toggle', root);
   const bigPlay = $('.big-play', root);
@@ -169,7 +170,7 @@ export function createPlayer(root, { onClose, onCaptions }) {
     syncButtons();
     showControls();
   });
-  video.addEventListener('ended', () => close('ended'));
+  video.addEventListener('ended', () => onEnded?.() || close('ended'));
   video.addEventListener('error', () => {
     if (!open || !video.getAttribute('src')) return;
     error.textContent = 'This video cannot play. Going back to the list…';

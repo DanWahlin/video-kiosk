@@ -291,7 +291,7 @@ button:focus-visible {
 
 .themes {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 .theme-tile {
@@ -526,4 +526,11 @@ dialog.browser::backdrop {
   .grid-2 {
     grid-template-columns: 1fr;
   }
+}
+
+/* Static site (no server): one source type, no file browser. */
+.admin:not(.is-static) .static-only,
+.admin.is-static .server-only,
+.admin.is-static .segmented {
+  display: none;
 }

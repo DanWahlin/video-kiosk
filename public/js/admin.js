@@ -3,7 +3,7 @@ import { $, $$, h, icon, cssTriples, setTheme } from './dom.js';
 const IDLE_LABELS = { 0: 'Never', 60: 'After 1 minute', 120: 'After 2 minutes', 300: 'After 5 minutes', 600: 'After 10 minutes' };
 const CAPTION_LABELS = { small: 'Small', medium: 'Medium', large: 'Large', 'x-large': 'Extra large' };
 
-export function createAdmin({ onLaunch }) {
+export function createAdmin({ backend, onLaunch }) {
   const root = $('#admin');
   const pathInput = $('#source-path');
   const titleInput = $('#folder-title');
@@ -14,17 +14,6 @@ export function createAdmin({ onLaunch }) {
   let state = null;
   let browseDir = '';
 
-  async function api(method, url, body) {
-    const res = await fetch(url, {
-      method,
-      headers: body ? { 'Content-Type': 'application/json' } : {},
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
-    return data;
-  }
-
   // Sends a settings request and shows the new state, or the error.
   async function apply(request) {
     try {
@@ -34,8 +23,8 @@ export function createAdmin({ onLaunch }) {
       toast(err.message);
     }
   }
-  const save = (patch) => apply(api('PUT', '/api/settings', patch));
-  const reload = () => apply(api('POST', '/api/reload'));
+  const save = (patch) => apply(backend.updateSettings(patch));
+  const reload = () => apply(backend.reload());
 
   function toast(msg) {
     const t = h('div', { class: 'toast', role: 'alert' }, msg);
@@ -48,6 +37,8 @@ export function createAdmin({ onLaunch }) {
     const { settings, validation, tools } = state;
     const type = settings.source.type;
     setTheme(settings.theme);
+    root.classList.toggle('is-static', backend.isStatic);
+    pathInput.readOnly = backend.isStatic;
 
     $$('.segmented button', root).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.type === type)));
     $('#path-label').textContent = type === 'json' ? 'Catalog file' : 'Videos folder (the videos folder or a folder inside it)';
@@ -76,6 +67,7 @@ export function createAdmin({ onLaunch }) {
     idle.value = String(settings.idleSeconds);
     $('#attract').setAttribute('aria-checked', String(settings.attractMode));
     $('#captions').setAttribute('aria-checked', String(settings.captions));
+    $('#loop').setAttribute('aria-checked', String(settings.loopPlayback));
     const ccSize = $('#caption-size');
     if (!ccSize.options.length) for (const s of state.captionSizes) ccSize.append(h('option', { value: s }, CAPTION_LABELS[s] ?? s));
     ccSize.value = settings.captionSize;
@@ -108,7 +100,7 @@ export function createAdmin({ onLaunch }) {
           'div',
           { class: 'status-actions' },
           h('button', { class: 'btn', type: 'button', onclick: reload }, icon('sync'), 'Reload'),
-          ok ? h('a', { class: 'btn', href: '/api/catalog/export', download: 'kiosk-catalog.json' }, icon('download'), 'Download catalog JSON') : null,
+          ok && !backend.isStatic ? h('a', { class: 'btn', href: '/api/catalog/export', download: 'kiosk-catalog.json' }, icon('download'), 'Download catalog JSON') : null,
         ),
       );
     }
@@ -143,7 +135,7 @@ export function createAdmin({ onLaunch }) {
   async function browse(dir) {
     const type = state.settings.source.type;
     try {
-      const data = await api('GET', `/api/browse?files=${type === 'json' ? 'json' : ''}&dir=${encodeURIComponent(dir ?? '')}`);
+      const data = await backend.browse(type, dir);
       browseDir = data.dir;
       // Folder mode stays inside the videos folder, so show paths from there.
       $('#browser-path').textContent = data.root ? `videos${data.dir.slice(data.root.length)}` : data.dir;
@@ -204,6 +196,7 @@ export function createAdmin({ onLaunch }) {
   $('#idle').addEventListener('change', (e) => save({ idleSeconds: Number(e.target.value) }));
   $('#attract').addEventListener('click', () => save({ attractMode: !state.settings.attractMode }));
   $('#captions').addEventListener('click', () => save({ captions: !state.settings.captions }));
+  $('#loop').addEventListener('click', () => save({ loopPlayback: !state.settings.loopPlayback }));
   $('#caption-size').addEventListener('change', (e) => save({ captionSize: e.target.value }));
   launchBtn.addEventListener('click', async () => {
     launchBtn.disabled = true;
@@ -222,7 +215,7 @@ export function createAdmin({ onLaunch }) {
   return {
     async show() {
       try {
-        state = await api('GET', '/api/settings');
+        state = await backend.getSettings();
       } catch (err) {
         root.hidden = false;
         $('.admin-panel', root).replaceChildren(

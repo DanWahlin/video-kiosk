@@ -20,7 +20,7 @@ export function h(tag, props = {}, ...children) {
 // UI icons (Primer Octicons) come from the server one time.
 let uiIcons = {};
 export async function loadUiIcons() {
-  uiIcons = await fetch('/api/ui-icons').then((r) => r.json());
+  uiIcons = await fetch('/icons.json').then((r) => r.json());
   fillIcons(document);
 }
 export const iconSvg = (name) => uiIcons[name] ?? '';

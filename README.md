@@ -7,7 +7,7 @@ the list at the same place.
 ![The kiosk home screen: a 3D carousel of folder cards](docs/images/home.jpg)
 
 - Node.js (Express) with plain HTML, CSS, and JavaScript. No build step.
-- Themes: **Dark**, **Light**, **GitHub Dark**, and **GitHub Light**.
+- Themes: **Dark**, **Light**, **GitHub Dark**, **GitHub Light**, **VS Code Dark**, and **VS Code Light**.
 - Closed captions from `.vtt` files, with a **CC On/Off** button in the player.
 - Touch, mouse, and keyboard: tap or click any folder card, swipe or drag the carousel, or use the arrow keys.
 - Works offline. Fonts, icons, and videos are local.
@@ -31,7 +31,7 @@ Requires:
    `PORT=3001 npm start` (macOS) or `$env:PORT=3001; npm start` (PowerShell). Use
    `npm start -- --no-open` to not open a browser.
 3. On the settings page, pick a catalog JSON file or a folder, a theme, and the kiosk
-   behavior (idle reset time, attract mode, captions default, caption size).
+   behavior (idle reset time, attract mode, loop video playback, captions default, caption size).
 4. Select **Launch kiosk**. It opens in full screen. **Esc** exits full screen only; a
    **Full screen** button then shows in the upper right. To return to the settings, select
    the gear on the home screen, press and hold the logo or the title for 3 seconds, or press
@@ -54,6 +54,9 @@ reload shows it at once.
 - **Player:** tap the video to show the controls, then tap to pause or play. The back arrow (top-left
   corner) is always visible; it shows **Back** when the video is paused. **CC** turns captions on or off; the choice carries to the next
   video. When a video ends, the list returns at the same place, with a check on that video.
+- **Loop video playback:** when this setting is on, the videos in a folder play one after
+  another. After the last video, the first plays again, until a viewer selects Back. Idle
+  reset never stops a playing video, so the loop runs until someone stops it.
 - **Idle:** after the idle time, the kiosk returns to the start screen and resets captions and
   watched checks. It never stops a video that is playing. With attract mode on, the carousel
   turns slowly when nobody uses the kiosk.
@@ -155,6 +158,49 @@ prefixes and are removed: `github-gh-t-question-dependabot.mp4` becomes `Questio
 
 Select **Download catalog JSON** on the settings page to get a catalog that you can edit.
 
+## Deploy to Azure
+
+The kiosk can also run as a static site on [Azure Static Web Apps](https://learn.microsoft.com/azure/static-web-apps/),
+with the videos in Azure Blob Storage. On a static site, the settings page saves the
+settings in the browser. **Browse** lists the catalog JSON files in the build; there is no
+folder mode. The live copy is at
+https://purple-sky-020d7461e.6.azurestaticapps.net/ (resource group `github-universe-roadtrip`).
+
+1. **Make a catalog with Blob Storage URLs, thumbnails, and video lengths** (needs ffmpeg).
+   Each file keeps its path under `videos/`:
+   ```bash
+   npm run azure:catalog -- --catalog catalogs/universe-on-the-road.json \
+     --base-url https://ghuniverseroadtrip.blob.core.windows.net/videos \
+     --out catalogs/universe-on-the-road-azure.json
+   ```
+2. **Upload the files** to a container with anonymous read access (`--public-access blob`) and
+   a CORS rule that allows `GET` (the browser needs it for captions). Set the blob service's
+   default version to 2021-08-06 or later, so that anonymous requests support seeking
+   (`az storage account blob-service-properties update --default-service-version 2021-08-06`).
+   Your account needs the
+   **Storage Blob Data Contributor** role:
+   ```bash
+   az storage blob upload-batch --account-name ghuniverseroadtrip -d videos -s videos \
+     --pattern "GitHub*/*.mp4" --content-type video/mp4 --auth-mode login --overwrite true
+   az storage blob upload-batch --account-name ghuniverseroadtrip -d videos -s videos \
+     --pattern "GitHub*/*.vtt" --content-type "text/vtt; charset=utf-8" --auth-mode login --overwrite true
+   az storage blob upload-batch --account-name ghuniverseroadtrip -d videos -s data/azure/thumbnails \
+     --destination-path thumbnails --content-type image/jpeg --auth-mode login --overwrite true
+   ```
+3. **List the catalogs in `static-site.json`.** It also sets the site's default settings
+   (theme, idle time, loop playback, captions). Each browser can change them on the settings
+   page.
+4. **Push to `main`.** The GitHub Actions workflow
+   ([`.github/workflows/deploy-static-web-app.yml`](.github/workflows/deploy-static-web-app.yml))
+   runs `npm run build:static` and deploys `dist/`. It uses the Static Web App's deployment
+   token in the `AZURE_STATIC_WEB_APPS_API_TOKEN` repository secret:
+   ```bash
+   gh secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body "$(az staticwebapp secrets list \
+     -n github-universe-roadtrip -g github-universe-roadtrip --query properties.apiKey -o tsv)"
+   ```
+   To build and look at the site locally, run `npm run build:static` and serve `dist/` with
+   any static file server.
+
 ## Security
 
 The server listens on `127.0.0.1` by default. The settings API accepts requests only from
@@ -166,11 +212,14 @@ on another device, the settings page still works only on the server computer.
 
 ```
 server.js                    Express server and API
-lib/                         Catalog validation, folder mode, ffmpeg media, settings, QuickXorHash
+lib/                         Catalog validation, folder mode, ffmpeg media, settings, icons, QuickXorHash
 public/                      Settings page and kiosk (HTML, CSS, JavaScript modules)
 schema/                      Catalog JSON schema
 tools/validate.js            Catalog validation CLI
 tools/sharepoint-catalog.js  Builds a catalog from a SharePoint listing and the board
+tools/azure-catalog.js       Makes a copy of a catalog with Blob Storage URLs and thumbnails
+tools/build-static.js        Builds the static site in dist/
+static-site.json             Catalogs and default settings for the static site
 catalogs/                    Catalogs and logo assets
 videos/                      Your video files (not in Git)
 docs/images/                 README screenshots

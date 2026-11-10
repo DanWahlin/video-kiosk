@@ -1,0 +1,11 @@
+{
+  "catalogs": ["catalogs/universe-on-the-road-azure.json", "catalogs/ignite-2026-azure.json"],
+  "defaults": {
+    "theme": "github-dark",
+    "idleSeconds": 120,
+    "attractMode": true,
+    "loopPlayback": false,
+    "captions": true,
+    "captionSize": "medium"
+  }
+}

@@ -4,3 +4,4 @@ data/
 videos/*
 !videos/.gitkeep
 .DS_Store
+dist/

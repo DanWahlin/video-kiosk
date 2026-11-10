@@ -3,11 +3,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import express from 'express';
-import octicons from '@primer/octicons';
 import { readCatalogFile, validateCatalog, resolveCatalog, resolvePath, isUrl } from './lib/catalog.js';
 import { scanFolder } from './lib/scan.js';
-import { createSettingsStore, THEMES, IDLE_CHOICES, CAPTION_SIZES } from './lib/settings.js';
+import { createSettingsStore, kioskSettings, THEMES, IDLE_CHOICES, CAPTION_SIZES } from './lib/settings.js';
 import { createMediaTools } from './lib/media.js';
+import { uiIcons } from './lib/icons.js';
+import { toClientCatalog } from './lib/client-catalog.js';
 
 const ROOT = import.meta.dirname;
 const PORT = Number(process.env.PORT) || 3000;
@@ -15,7 +16,6 @@ const HOST = process.env.HOST || '127.0.0.1';
 const CATALOG_DIR = path.join(ROOT, 'catalogs');
 // Folder mode can use only this folder and the folders inside it.
 const VIDEOS_DIR = path.join(ROOT, 'videos');
-const UI_ICONS = ['arrow-left', 'check-circle-fill', 'chevron-left', 'chevron-right', 'file', 'file-directory', 'home', 'play', 'screen-full', 'video', 'alert', 'sync', 'download', 'gear'];
 
 const settingsStore = createSettingsStore(path.join(ROOT, 'data', 'settings.json'));
 const media = createMediaTools(path.join(ROOT, 'data', 'cache'));
@@ -88,12 +88,6 @@ function activate() {
   return lastResult;
 }
 
-function svg(name) {
-  const icon = octicons[name];
-  return icon ? icon.toSVG({ height: 24, 'aria-hidden': 'true' }) : '';
-}
-const iconForClient = (icon, url) => (icon.octicon ? { svg: svg(icon.octicon) } : { url });
-
 function settingsResponse() {
   const settings = settingsStore.get();
   // Folder sources outside the videos folder cannot load, so do not offer them as quick picks.
@@ -130,7 +124,10 @@ app.use(express.static(path.join(ROOT, 'public'), { index: 'index.html' }));
 app.use('/fonts', express.static(path.join(ROOT, 'node_modules/@fontsource-variable/mona-sans/files'), { maxAge: '30d', immutable: true }));
 app.use('/schema', express.static(path.join(ROOT, 'schema')));
 
-app.get('/api/ui-icons', (_req, res) => res.json(Object.fromEntries(UI_ICONS.map((n) => [n, svg(n)]))));
+const ICONS = uiIcons();
+app.get('/icons.json', (_req, res) => res.json(ICONS));
+// Only a static build has kiosk.config.json. "No content" tells the page to use this server.
+app.get('/kiosk.config.json', (_req, res) => res.sendStatus(204));
 
 app.get('/api/settings', adminOnly, (_req, res) => res.json(settingsResponse()));
 
@@ -199,31 +196,11 @@ app.get('/api/catalog', async (_req, res) => {
   const { runtime, version } = active;
   const s = settingsStore.get();
   // A URL plays from where it is; a local file goes through the /media routes.
-  const mediaUrl = (file, route) => (isUrl(file) ? file : `${route}?v=${version}`);
+  const local = (file, route) => (isUrl(file) ? file : `${route}?v=${version}`);
   res.json({
     version,
-    settings: { theme: s.theme, idleSeconds: s.idleSeconds, attractMode: s.attractMode, captions: s.captions, captionSize: s.captionSize },
-    title: runtime.title,
-    subtitle: runtime.subtitle,
-    icon: iconForClient(runtime.icon, `/media/icon?v=${version}`),
-    iconLight: runtime.iconLight ? iconForClient(runtime.iconLight, `/media/icon-light?v=${version}`) : null,
-    folders: runtime.folders.map((f, fi) => ({
-      title: f.title,
-      description: f.description,
-      icon: iconForClient(f.icon, `/media/${fi}/icon?v=${version}`),
-      videos: f.videos.map((v, vi) => {
-        const base = `/media/${fi}/${vi}`;
-        return {
-          title: v.title,
-          description: v.description,
-          duration: v.duration,
-          src: mediaUrl(v.src, `${base}/video`),
-          captions: v.captions ? mediaUrl(v.captions, `${base}/captions`) : null,
-          // Without a thumbnail file, the server makes one only when ffmpeg is installed.
-          thumbnail: v.thumbnail || media.available.ffmpeg ? mediaUrl(v.thumbnail ?? '', `${base}/thumb`) : null,
-        };
-      }),
-    })),
+    settings: kioskSettings(s),
+    ...toClientCatalog(runtime, { mediaUrl: local, imageUrl: local, canMakeThumbnails: media.available.ffmpeg }),
   });
 });
 
