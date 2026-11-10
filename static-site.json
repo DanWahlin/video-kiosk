@@ -1,7 +1,7 @@
 {
   "catalogs": [
-    "catalogs/universe-on-the-road-azure.json",
-    "catalogs/ignite-2026-azure.json"
+    "catalogs/universe-on-the-road-azure-11-2026.json",
+    "catalogs/ignite-azure-11-2026.json"
   ],
   "mediaVersion": 2,
   "defaults": {

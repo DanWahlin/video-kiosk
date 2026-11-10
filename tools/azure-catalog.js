@@ -3,9 +3,9 @@
 // Each local file under --videos gets the same relative path under --base-url, and the
 // tool adds a thumbnail (made with ffmpeg, saved under --thumbs) and the video length.
 //
-//   node tools/azure-catalog.js --catalog catalogs/universe-on-the-road.json \
+//   node tools/azure-catalog.js --catalog catalogs/universe-on-the-road-11-2026.json \
 //     --base-url https://<account>.blob.core.windows.net/videos \
-//     --out catalogs/universe-on-the-road-azure.json
+//     --out catalogs/universe-on-the-road-azure-11-2026.json
 //
 // Then upload the videos/ folder and the thumbnails folder to the same container
 // (see README.md, "Deploy to Azure").

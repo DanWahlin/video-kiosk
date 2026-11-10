@@ -1,11 +1,11 @@
 ---
 name: kiosk-catalog-from-sharepoint
-description: Build or refresh the video kiosk catalog (catalogs/universe-on-the-road.json) from the Ignite 2026 booth folders in SharePoint, with titles and descriptions from the GitHub project board draft items. Read-only for SharePoint and GitHub. Use when the user asks to regenerate, refresh, or update the kiosk catalog, or to add booth videos to the kiosk.
+description: Build or refresh the video kiosk catalog (catalogs/universe-on-the-road-11-2026.json) from the Ignite 2026 booth folders in SharePoint, with titles and descriptions from the GitHub project board draft items. Read-only for SharePoint and GitHub. Use when the user asks to regenerate, refresh, or update the kiosk catalog, or to add booth videos to the kiosk.
 ---
 
 # Kiosk catalog from SharePoint
 
-This procedure makes `catalogs/universe-on-the-road.json` for the video kiosk.
+This procedure makes `catalogs/universe-on-the-road-11-2026.json` for the video kiosk.
 
 > **SharePoint and the GitHub project board are read-only.** Never create, change, move,
 > rename, upload, or delete anything in SharePoint or on the board. Use only the read
@@ -69,7 +69,7 @@ The text before ` - ` becomes the folder title. The text after it becomes the de
    ```bash
    node tools/sharepoint-catalog.js --listing <listing.json> --board <board.json> \
      --metadata /Users/danwahlin/Desktop/test/ignite-2026/.github/skills/booth-video-tracker/video-metadata.json \
-     --local videos --out catalogs/universe-on-the-road.json
+     --local videos --out catalogs/universe-on-the-road-11-2026.json
    ```
    The script matches each SharePoint file to a local file by QuickXorHash (the same
    hash that SharePoint reports), so renamed files still match. It caches local hashes in
@@ -79,5 +79,5 @@ The text before ` - ` becomes the folder title. The text after it becomes the de
    - `NOT LOCAL (skipped)`: the video is in SharePoint but not in `videos/`.
    - `NEEDS METADATA`: no board item or metadata. The title comes from the file name and
      the description is empty. Do not invent a description; tell the user.
-7. **Validate:** `npm run validate -- catalogs/universe-on-the-road.json`. Then, on the
+7. **Validate:** `npm run validate -- catalogs/universe-on-the-road-11-2026.json`. Then, on the
    settings page, select **Reload**.

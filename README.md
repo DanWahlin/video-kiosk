@@ -100,6 +100,9 @@ In browser kiosk mode, select the gear on the home screen (or hold the logo for 
 
 A catalog lists the folders and videos. Schema: [`schema/kiosk-catalog.schema.json`](schema/kiosk-catalog.schema.json).
 
+Catalog file names end with the month and year they were made, as `<name>-<month>-<year>.json`
+(for example, `universe-on-the-road-11-2026.json`), so that later versions can be told apart.
+
 ```json
 {
   "$schema": "../schema/kiosk-catalog.schema.json",
@@ -140,7 +143,7 @@ A catalog lists the folders and videos. Schema: [`schema/kiosk-catalog.schema.js
 Relative paths start from the folder that contains the catalog. Validate a catalog with:
 
 ```bash
-npm run validate -- catalogs/universe-on-the-road.json
+npm run validate -- catalogs/universe-on-the-road-11-2026.json
 ```
 
 Errors stop the kiosk from using a catalog. Warnings do not; for example, the kiosk hides a
@@ -172,9 +175,9 @@ https://purple-sky-020d7461e.6.azurestaticapps.net/ (resource group `github-univ
 1. **Make a catalog with Blob Storage URLs, thumbnails, and video lengths** (needs ffmpeg).
    Each file keeps its path under `videos/`:
    ```bash
-   npm run azure:catalog -- --catalog catalogs/universe-on-the-road.json \
+   npm run azure:catalog -- --catalog catalogs/universe-on-the-road-11-2026.json \
      --base-url https://ghuniverseroadtrip.blob.core.windows.net/videos \
-     --out catalogs/universe-on-the-road-azure.json
+     --out catalogs/universe-on-the-road-azure-11-2026.json
    ```
 2. **Upload the files** to a container with anonymous read access (`--public-access blob`) and
    two blob service settings that make the videos stream:
