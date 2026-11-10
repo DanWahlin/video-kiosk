@@ -152,12 +152,6 @@ prefixes and are removed: `github-gh-t-question-dependabot.mp4` becomes `Questio
 
 Select **Download catalog JSON** on the settings page to get a catalog that you can edit.
 
-## Catalog from SharePoint
-
-`catalogs/universe-on-the-road.json` comes from the Ignite 2026 booth folders in SharePoint
-(read with WorkIQ) and the GitHub project board (read with `gh`). The read-only procedure
-is in [`.github/skills/kiosk-catalog-from-sharepoint/SKILL.md`](.github/skills/kiosk-catalog-from-sharepoint/SKILL.md).
-
 ## Security
 
 The server listens on `127.0.0.1` by default. The settings API accepts requests only from
