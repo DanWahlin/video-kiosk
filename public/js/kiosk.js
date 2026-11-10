@@ -312,7 +312,13 @@ export function createKiosk({ backend, onExit }) {
   // A browser in kiosk mode fills the screen without the Fullscreen API, so check the size too.
   const isFullscreen = () =>
     !!document.fullscreenElement || (Math.abs(innerWidth - screen.width) < 2 && Math.abs(innerHeight - screen.height) < 2);
-  const syncFullscreenButton = () => (fsBtn.hidden = isFullscreen());
+  // macOS shows its menu bar over full-screen pages (iPads also say "Mac", but have touch points).
+  const isMac = /Mac/.test(navigator.platform) && navigator.maxTouchPoints < 2;
+  const syncFullscreen = () => {
+    const full = isFullscreen();
+    fsBtn.hidden = full;
+    root.classList.toggle('mac-fullscreen', isMac && full);
+  };
   const enterFullscreen = () => document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
   fsBtn.addEventListener('click', enterFullscreen);
   $('#open-settings').addEventListener('click', () => exit());
@@ -354,14 +360,14 @@ export function createKiosk({ backend, onExit }) {
     lastInput = performance.now();
     idleResetDone = false;
     timer = setInterval(idleTick, 500);
-    syncFullscreenButton();
+    syncFullscreen();
     listeners = new AbortController();
     const { signal } = listeners;
     addEventListener('keydown', onKey, { signal });
     for (const type of ['pointerdown', 'pointermove', 'wheel']) addEventListener(type, noteInput, { capture: true, passive: true, signal });
     addEventListener('contextmenu', (e) => e.preventDefault(), { signal });
-    addEventListener('resize', syncFullscreenButton, { signal });
-    document.addEventListener('fullscreenchange', syncFullscreenButton, { signal });
+    addEventListener('resize', syncFullscreen, { signal });
+    document.addEventListener('fullscreenchange', syncFullscreen, { signal });
   }
 
   function exit() {

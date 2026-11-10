@@ -2,7 +2,10 @@
    Kiosk shell. One "em" scales with the screen, so the layout looks the same
    on a 1080p or a 4K display.
    --------------------------------------------------------------------------- */
+/* On a Mac in full screen, the menu bar and the window title strip slide over the top of
+   the page when the pointer reaches the top edge. --top-inset keeps the corner buttons below them. */
 .kiosk {
+  --top-inset: 0px;
   position: fixed;
   inset: 0;
   font-size: clamp(11px, calc(0.9vmin + 0.55vw), 46px);
@@ -351,24 +354,29 @@ button.pill:active {
 .folder-screen {
   padding: 0 3.2em 1.8em;
 }
+/* Back: the same top row as Full screen and the gear, in the top-left corner. */
 .back-btn {
   position: absolute;
-  top: 1.9em;
-  left: 2.6em;
+  top: calc((0.8em + 1.2em) / 1.15 + var(--top-inset));
+  translate: 0 -50%;
+  left: calc(0.8em / 1.15);
   z-index: 10;
   font-size: 1.15em;
 }
+/* Full screen: the same place on every screen, in the top-right row to the left of the gear.
+   This button's font is 1.15 times larger than the gear's, so its sizes are divided by 1.15. */
 .fs-btn {
   position: absolute;
-  top: 1.9em;
-  right: 2.6em;
+  top: calc((0.8em + 1.2em) / 1.15 + var(--top-inset));
+  translate: 0 -50%;
+  right: calc((0.8em + 2.4em + 0.6em) / 1.15);
   z-index: 10;
   font-size: 1.15em;
 }
 /* Gear in the top-right corner of the home screen, out of the way. It opens the settings. */
 .settings-btn {
   position: absolute;
-  top: 0.8em;
+  top: calc(0.8em + var(--top-inset));
   right: 0.8em;
   z-index: 10;
   width: 2.4em;
@@ -389,13 +397,6 @@ button.pill:active {
 }
 .kiosk:has(#home[hidden]) .settings-btn {
   display: none;
-}
-/* On the home screen, Full screen sits to the left of the gear. */
-.kiosk:has(#home:not([hidden])) .fs-btn {
-  /* Same center line as the gear. This button's font is 1.15 times larger, so divide. */
-  top: calc((0.8em + 1.2em) / 1.15);
-  translate: 0 -50%;
-  right: calc((0.8em + 2.4em + 0.6em) / 1.15);
 }
 /* Holding the logo or title opens the settings. Show that the hold is counting. */
 .brand-icon,
@@ -752,7 +753,7 @@ button.pill:active {
 /* Small and in the top-left corner. */
 .player-back {
   position: absolute;
-  top: 0.8em;
+  top: calc(0.8em + var(--top-inset));
   left: 0.8em;
   z-index: 2;
   padding: 0.45em 1em;
@@ -922,4 +923,8 @@ button.pill:active {
   .screen-enter {
     animation: none;
   }
+}
+
+.kiosk.mac-fullscreen {
+  --top-inset: 56px;
 }
