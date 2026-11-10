@@ -5,7 +5,7 @@ const PAUSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4"
 
 // Full-screen video overlay with large, touch-friendly controls.
 // onEnded() returns true when it starts the next video itself (loop playback).
-export function createPlayer(root, { onClose, onCaptions, onEnded }) {
+export function createPlayer(root, { onClose, onCaptions, onMuted, onEnded }) {
   const video = $('video', root);
   const toggle = $('.toggle', root);
   const bigPlay = $('.big-play', root);
@@ -16,6 +16,7 @@ export function createPlayer(root, { onClose, onCaptions, onEnded }) {
   const total = $('.time-total', root);
   const cc = $('.cc', root);
   const ccBox = $('.captions', root);
+  const sound = $('.sound', root);
   const error = $('.player-error', root);
   let hideTimer = 0;
   let errorTimer = 0;
@@ -103,6 +104,15 @@ export function createPlayer(root, { onClose, onCaptions, onEnded }) {
     $('.cc-state', cc).textContent = on ? 'On' : 'Off';
   }
 
+  // The speaker button shows "unmute" (sound on) or "mute" (sound off).
+  function setMuted(on) {
+    video.muted = on;
+    sound.classList.toggle('is-off', on);
+    sound.setAttribute('aria-pressed', String(on));
+    sound.setAttribute('aria-label', on ? 'Turn sound on' : 'Mute');
+    $('.icon', sound).innerHTML = iconSvg(on ? 'mute' : 'unmute');
+  }
+
   function removeTrack() {
     trackEl?.remove();
     trackEl = null;
@@ -124,7 +134,7 @@ export function createPlayer(root, { onClose, onCaptions, onEnded }) {
       el.track.addEventListener('cuechange', () => el === trackEl && renderCues());
       trackEl = el;
     }
-    video.muted = muted;
+    setMuted(muted);
     video.src = v.src;
     root.hidden = false;
     shown = { p: -1, now: '', total: '' };
@@ -156,6 +166,11 @@ export function createPlayer(root, { onClose, onCaptions, onEnded }) {
   toggle.addEventListener('click', togglePlay);
   bigPlay.addEventListener('click', togglePlay);
   $('.close', root).addEventListener('click', () => close('closed'));
+  sound.addEventListener('click', () => {
+    setMuted(!video.muted);
+    onMuted?.(video.muted);
+    showControls();
+  });
   cc.addEventListener('click', () => {
     setCaptions(!captionsOn);
     onCaptions?.(captionsOn);

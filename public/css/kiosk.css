@@ -797,6 +797,9 @@ button.pill:active {
   color: #fff;
   flex: none;
 }
+.player-bottom .sound.is-off {
+  opacity: 0.6;
+}
 .player-bottom .cc {
   flex: none;
   min-width: 6.2em;

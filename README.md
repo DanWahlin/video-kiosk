@@ -52,13 +52,14 @@ reload shows it at once.
 - **Home:** tap any folder card to open it. Swipe or use the arrows and dots to turn the carousel.
   The gear in the top-right corner opens the settings.
 - **Video list:** tap a video to play it. **Back** or **Home** returns to the carousel.
-- **Player:** tap the video to show the controls, then tap to pause or play. The back arrow (top-left
-  corner) is always visible; it shows **Back** when the video is paused. **CC** turns captions on or off; the choice carries to the next
-  video. When a video ends, the list returns at the same place, with a check on that video.
+- **Player:** tap the video to show the controls, then tap to pause or play. The back arrow
+  (top-left corner) is always visible; it shows **Back** when the video is paused. The speaker
+  button turns sound on or off, and **CC** turns captions on or off; both choices carry to the
+  next video. When a video ends, the list returns at the same place, with a check on that video.
 - **Loop video playback:** when this setting is on, the videos in a folder play one after
   another. After the last video, the first plays again, until a viewer selects Back. Idle
   reset never stops a playing video, so the loop runs until someone stops it.
-- **Mute videos:** when this setting is on, every video plays without sound. Turn captions on
+- **Mute videos:** when this setting is on, every video starts without sound. Turn captions on
   so viewers can still follow along.
 - **Idle:** after the idle time, the kiosk returns to the start screen and resets captions and
   watched checks. It never stops a video that is playing. With attract mode on, the carousel

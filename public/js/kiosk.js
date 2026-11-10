@@ -24,7 +24,9 @@ export function createKiosk({ backend, onExit }) {
   let folderIndex = -1;
   let currentRow = -1;
   let watched = new Set();
-  let captionsOn = true; // The viewer's choice; an idle reset restores the admin default.
+  // The viewer's choices for captions and sound; an idle reset restores the admin defaults.
+  let captionsOn = true;
+  let mutedOn = false;
   let lastInput = 0;
   let idleResetDone = false;
   let lastAttract = 0;
@@ -35,7 +37,7 @@ export function createKiosk({ backend, onExit }) {
     onOpen: (i) => openFolder(i),
     onIndex: (i) => $$('button', homeDots).forEach((d, k) => d.classList.toggle('is-active', k === i)),
   });
-  const player = createPlayer($('#player'), { onClose: onPlayerClosed, onCaptions: (on) => (captionsOn = on), onEnded: playNext });
+  const player = createPlayer($('#player'), { onClose: onPlayerClosed, onCaptions: (on) => (captionsOn = on), onMuted: (on) => (mutedOn = on), onEnded: playNext });
 
   $('.nav.prev', home).addEventListener('click', () => carousel.prev());
   $('.nav.next', home).addEventListener('click', () => carousel.next());
@@ -107,6 +109,7 @@ export function createKiosk({ backend, onExit }) {
     if (reset) {
       watched = new Set();
       captionsOn = catalog.settings.captions;
+      mutedOn = catalog.settings.muteVideos;
       carousel.go(carousel.home, { instant: wasFolder });
     }
     if (!wasFolder) return;
@@ -234,7 +237,7 @@ export function createKiosk({ backend, onExit }) {
   // ---- Playback ----
   function playVideo(vi) {
     markCurrent(vi);
-    player.open(catalog.folders[folderIndex].videos[vi], { captions: captionsOn, muted: catalog.settings.muteVideos });
+    player.open(catalog.folders[folderIndex].videos[vi], { captions: captionsOn, muted: mutedOn });
   }
 
   // Loop playback: when a video ends, the next one in the folder plays, and after the
@@ -357,6 +360,7 @@ export function createKiosk({ backend, onExit }) {
     carousel.measure();
     carousel.go(carousel.home, { instant: true });
     captionsOn = catalog.settings.captions;
+    mutedOn = catalog.settings.muteVideos;
     lastInput = performance.now();
     idleResetDone = false;
     timer = setInterval(idleTick, 500);
