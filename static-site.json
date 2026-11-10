@@ -1,10 +1,15 @@
 {
-  "catalogs": ["catalogs/universe-on-the-road-azure.json", "catalogs/ignite-2026-azure.json"],
+  "catalogs": [
+    "catalogs/universe-on-the-road-azure.json",
+    "catalogs/ignite-2026-azure.json"
+  ],
+  "mediaVersion": 2,
   "defaults": {
     "theme": "github-dark",
     "idleSeconds": 120,
     "attractMode": true,
     "loopPlayback": false,
+    "muteVideos": false,
     "captions": true,
     "captionSize": "medium"
   }

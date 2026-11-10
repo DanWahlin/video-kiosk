@@ -31,7 +31,8 @@ Requires:
    `PORT=3001 npm start` (macOS) or `$env:PORT=3001; npm start` (PowerShell). Use
    `npm start -- --no-open` to not open a browser.
 3. On the settings page, pick a catalog JSON file or a folder, a theme, and the kiosk
-   behavior (idle reset time, attract mode, loop video playback, captions default, caption size).
+   behavior (idle reset time, attract mode, loop video playback, mute videos, captions default,
+   caption size).
 4. Select **Launch kiosk**. It opens in full screen. **Esc** exits full screen only; a
    **Full screen** button then shows in the upper right. To return to the settings, select
    the gear on the home screen, press and hold the logo or the title for 3 seconds, or press
@@ -57,6 +58,8 @@ reload shows it at once.
 - **Loop video playback:** when this setting is on, the videos in a folder play one after
   another. After the last video, the first plays again, until a viewer selects Back. Idle
   reset never stops a playing video, so the loop runs until someone stops it.
+- **Mute videos:** when this setting is on, every video plays without sound. Turn captions on
+  so viewers can still follow along.
 - **Idle:** after the idle time, the kiosk returns to the start screen and resets captions and
   watched checks. It never stops a video that is playing. With attract mode on, the carousel
   turns slowly when nobody uses the kiosk.
@@ -174,22 +177,32 @@ https://purple-sky-020d7461e.6.azurestaticapps.net/ (resource group `github-univ
      --out catalogs/universe-on-the-road-azure.json
    ```
 2. **Upload the files** to a container with anonymous read access (`--public-access blob`) and
-   a CORS rule that allows `GET` (the browser needs it for captions). Set the blob service's
-   default version to 2021-08-06 or later, so that anonymous requests support seeking
-   (`az storage account blob-service-properties update --default-service-version 2021-08-06`).
-   Your account needs the
-   **Storage Blob Data Contributor** role:
+   two blob service settings that make the videos stream:
+   - **Default service version.** A browser does not send the `x-ms-version` header, so without
+     a default Blob Storage answers with a 2009 API version that does not return
+     `Accept-Ranges: bytes`. Then the browser cannot fetch parts of a video to stream or seek:
+     `az storage account blob-service-properties update --default-service-version 2026-02-06`.
+   - **CORS** for `GET`, `HEAD`, and `OPTIONS` that exposes `Accept-Ranges`, `Content-Range`,
+     `Content-Length`, `Content-Type`, and `ETag` (the browser also needs CORS for captions).
+
+   Upload each file with its content type. Run `npm run azure:faststart` first: it copies each
+   MP4 whose index is at the end of the file to `data/azure/faststart` with the index at the
+   start (no re-encoding), so it starts playing at once. Upload those copies after the others.
+   Your account needs the **Storage Blob Data Contributor** role:
    ```bash
    az storage blob upload-batch --account-name ghuniverseroadtrip -d videos -s videos \
-     --pattern "GitHub*/*.mp4" --content-type video/mp4 --auth-mode login --overwrite true
+     --pattern "*/*.mp4" --content-type video/mp4 --auth-mode login --overwrite true
    az storage blob upload-batch --account-name ghuniverseroadtrip -d videos -s videos \
-     --pattern "GitHub*/*.vtt" --content-type "text/vtt; charset=utf-8" --auth-mode login --overwrite true
+     --pattern "*/*.vtt" --content-type "text/vtt; charset=utf-8" --auth-mode login --overwrite true
+   az storage blob upload-batch --account-name ghuniverseroadtrip -d videos -s data/azure/faststart \
+     --pattern "*/*.mp4" --content-type video/mp4 --auth-mode login --overwrite true
    az storage blob upload-batch --account-name ghuniverseroadtrip -d videos -s data/azure/thumbnails \
      --destination-path thumbnails --content-type image/jpeg --auth-mode login --overwrite true
    ```
 3. **List the catalogs in `static-site.json`.** It also sets the site's default settings
-   (theme, idle time, loop playback, captions). Each browser can change them on the settings
-   page.
+   (theme, idle time, loop playback, mute, captions). Each browser can change them on the
+   settings page. After you replace files in Blob Storage, increase `mediaVersion`: the build
+   adds it to the media URLs, so browsers do not use copies that they stored before.
 4. **Push to `main`.** The GitHub Actions workflow
    ([`.github/workflows/deploy-static-web-app.yml`](.github/workflows/deploy-static-web-app.yml))
    runs `npm run build:static` and deploys `dist/`. It uses the Static Web App's deployment
@@ -219,6 +232,7 @@ tools/validate.js            Catalog validation CLI
 tools/sharepoint-catalog.js  Builds a catalog from a SharePoint listing and the board
 tools/azure-catalog.js       Makes a copy of a catalog with Blob Storage URLs and thumbnails
 tools/build-static.js        Builds the static site in dist/
+tools/faststart.js           Copies MP4s with the index moved to the start, for streaming
 static-site.json             Catalogs and default settings for the static site
 catalogs/                    Catalogs and logo assets
 videos/                      Your video files (not in Git)

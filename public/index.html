@@ -87,6 +87,10 @@
               <button id="loop" class="switch" type="button" role="switch" aria-checked="false" aria-label="Loop video playback"></button>
             </div>
             <div class="option">
+              <div><strong>Mute videos</strong><span>Play every video without sound. Turn captions on so viewers can still follow along.</span></div>
+              <button id="mute" class="switch" type="button" role="switch" aria-checked="false" aria-label="Mute videos"></button>
+            </div>
+            <div class="option">
               <div><strong>Captions on by default</strong><span>Show captions when a video has a .vtt file. Viewers can turn them on or off with the CC button in the player.</span></div>
               <button id="captions" class="switch" type="button" role="switch" aria-checked="true" aria-label="Captions"></button>
             </div>
@@ -173,6 +177,7 @@
             <button class="pill cc" type="button" aria-label="Turn captions off" aria-pressed="true" hidden><span class="cc-label">CC</span><span class="cc-state">On</span></button>
           </div>
         </div>
+        <div class="buffering" role="status" aria-label="Loading"></div>
         <div class="player-error" hidden></div>
       </div>
     </div>

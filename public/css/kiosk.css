@@ -878,6 +878,31 @@ button.pill:active {
   width: 3.2em;
   height: 3.2em;
 }
+/* Buffering spinner, in the center of the video */
+.buffering {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4.5em;
+  height: 4.5em;
+  margin: -2.25em 0 0 -2.25em;
+  border-radius: 50%;
+  border: 0.4em solid rgb(255 255 255 / 0.25);
+  border-top-color: rgb(var(--active));
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.player.is-buffering .buffering {
+  opacity: 1;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .player-error {
   position: absolute;
   left: 50%;

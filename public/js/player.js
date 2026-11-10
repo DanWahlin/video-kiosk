@@ -109,7 +109,7 @@ export function createPlayer(root, { onClose, onCaptions, onEnded }) {
     ccBox.replaceChildren();
   }
 
-  function openVideo(v, { captions }) {
+  function openVideo(v, { captions, muted = false }) {
     open = true;
     clearTimeout(errorTimer);
     error.hidden = true;
@@ -124,6 +124,7 @@ export function createPlayer(root, { onClose, onCaptions, onEnded }) {
       el.track.addEventListener('cuechange', () => el === trackEl && renderCues());
       trackEl = el;
     }
+    video.muted = muted;
     video.src = v.src;
     root.hidden = false;
     shown = { p: -1, now: '', total: '' };
@@ -166,6 +167,17 @@ export function createPlayer(root, { onClose, onCaptions, onEnded }) {
   });
   // Seeking or loading while paused still updates the bar.
   for (const type of ['seeked', 'durationchange', 'loadedmetadata']) video.addEventListener(type, draw);
+  // A spinner while the video waits for data, so a wait does not look like a pause.
+  // It shows only after a short delay, so quick waits do not make it flash.
+  let bufferTimer = 0;
+  const setBuffering = (on) => {
+    clearTimeout(bufferTimer);
+    if (on) bufferTimer = setTimeout(() => open && root.classList.add('is-buffering'), 400);
+    else root.classList.remove('is-buffering');
+  };
+  video.addEventListener('waiting', () => setBuffering(true));
+  for (const type of ['playing', 'canplay', 'pause', 'ended', 'error', 'emptied']) video.addEventListener(type, () => setBuffering(false));
+
   video.addEventListener('pause', () => {
     syncButtons();
     showControls();

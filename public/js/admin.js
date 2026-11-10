@@ -68,6 +68,7 @@ export function createAdmin({ backend, onLaunch }) {
     $('#attract').setAttribute('aria-checked', String(settings.attractMode));
     $('#captions').setAttribute('aria-checked', String(settings.captions));
     $('#loop').setAttribute('aria-checked', String(settings.loopPlayback));
+    $('#mute').setAttribute('aria-checked', String(settings.muteVideos));
     const ccSize = $('#caption-size');
     if (!ccSize.options.length) for (const s of state.captionSizes) ccSize.append(h('option', { value: s }, CAPTION_LABELS[s] ?? s));
     ccSize.value = settings.captionSize;
@@ -197,6 +198,7 @@ export function createAdmin({ backend, onLaunch }) {
   $('#attract').addEventListener('click', () => save({ attractMode: !state.settings.attractMode }));
   $('#captions').addEventListener('click', () => save({ captions: !state.settings.captions }));
   $('#loop').addEventListener('click', () => save({ loopPlayback: !state.settings.loopPlayback }));
+  $('#mute').addEventListener('click', () => save({ muteVideos: !state.settings.muteVideos }));
   $('#caption-size').addEventListener('change', (e) => save({ captionSize: e.target.value }));
   launchBtn.addEventListener('click', async () => {
     launchBtn.disabled = true;

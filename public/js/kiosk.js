@@ -234,7 +234,7 @@ export function createKiosk({ backend, onExit }) {
   // ---- Playback ----
   function playVideo(vi) {
     markCurrent(vi);
-    player.open(catalog.folders[folderIndex].videos[vi], { captions: captionsOn });
+    player.open(catalog.folders[folderIndex].videos[vi], { captions: captionsOn, muted: catalog.settings.muteVideos });
   }
 
   // Loop playback: when a video ends, the next one in the folder plays, and after the

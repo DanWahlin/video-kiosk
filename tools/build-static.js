@@ -40,9 +40,14 @@ for (const file of files) {
   const name = path.basename(read.file, '.json');
 
   // Video files must already be on the web. Icon images are copied into the site.
+  // mediaVersion in static-site.json goes on each media URL: a new value makes browsers skip
+  // copies they stored before (for example, after files or storage settings change).
   const mediaUrl = (src) => {
     if (!isUrl(src)) throw new Error(`${file}: "${src}" is not a URL. Run tools/azure-catalog.js first.`);
-    return src;
+    if (!site.mediaVersion) return src;
+    const url = new URL(src);
+    url.searchParams.set('v', String(site.mediaVersion));
+    return url.href;
   };
   const imageUrl = (src) => {
     if (isUrl(src)) return src;
