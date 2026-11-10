@@ -1,0 +1,382 @@
+{
+  "$schema": "../schema/kiosk-catalog.schema.json",
+  "title": "Universe on the Road",
+  "subtitle": "Self-Serve Videos",
+  "icon": "assets/GitHub_Invertocat_White.svg",
+  "iconLight": "assets/GitHub_Invertocat_Black.svg",
+  "folders": [
+    {
+      "title": "GitHub Advanced Security",
+      "description": "Found means fixed",
+      "icon": "shield-check",
+      "videos": [
+        {
+          "title": "GitHub Copilot: From Mobile to VS Code, Automations, and Secure Pull Requests",
+          "description": "A captioned keynote demo of mobile-to-VS Code session continuity, Sentry canvases, automations, code scanning and Agentic Autofix, AI push protection, Copilot Code Review, stacked pull requests, and Agent Merge.",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/copilot-continuity-automations-and-security.mp4",
+          "captions": "../videos/GitHub Advanced Security - Found means fixed/copilot-continuity-automations-and-security.vtt"
+        },
+        {
+          "title": "GitHub AI Scan: Find Security Issues Beyond CodeQL",
+          "description": "A narrated explainer video. Understand how AI Scan complements CodeQL on eligible pull requests, how to read its findings, and what its limits and setup requirements are.",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/github-ai-scan.mp4",
+          "captions": "../videos/GitHub Advanced Security - Found means fixed/github-ai-scan.vtt"
+        },
+        {
+          "title": "Quiz: Cloud agent and autofix are available in the repo. What does assigning a code scanning alert to Copilot do?",
+          "description": "An animated multiple-choice quiz about GitHub Advanced Security. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Agentic autofix attempts and validates a fix, but validation is best-effort and human review still matters.",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/github-b-question-agentic-autofix-code-scanning.mp4"
+        },
+        {
+          "title": "GitHub Code Quality: Catch Issues Before They Merge",
+          "description": "A narrated demo video. GitHub Code Quality catches a reliability issue (a format string that can throw at runtime) with CodeQL and flags it on the changed pull request lines. Copilot Autofix proposes the correction in the same pull request, and Rulesets enforce the quality standard before merge. Repository-level views help teams prioritize existing reliability and maintainability work. It ends with a QR code to the GitHub Code Quality page.",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/github-code-quality.mp4",
+          "captions": "../videos/GitHub Advanced Security - Found means fixed/github-code-quality.vtt"
+        },
+        {
+          "title": "Quiz: You're using GitHub Code Quality. Which statements about its findings are true?",
+          "description": "An animated multiple-choice quiz about GitHub Advanced Security. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. PR findings are rules-based; AI analysis runs after merge. Quality focuses on reliability and maintainability.",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/github-code-quality-quiz.mp4"
+        },
+        {
+          "title": "Fix the dependency risks that matter first with Dependabot",
+          "description": "A narrated explainer video. A long list of dependency alerts does not tell you what to fix first. It shows how to add evidence from your code and your running application: start with severity, then filter Dependabot alerts by reachability and by deployment and runtime context. It then opens one alert, follows the call path, checks the linked workload, and picks a patched version, so the remediation decision stays grounded in evidence.",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/github-dependabot-prioritization.mp4",
+          "captions": "../videos/GitHub Advanced Security - Found means fixed/github-dependabot-prioritization.vtt"
+        },
+        {
+          "title": "PR security Q&A",
+          "description": "PR security Q&A",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/github-gf-question-pr-security.mp4"
+        },
+        {
+          "title": "gh-secure: Protect Your Repo in 2 Minutes",
+          "description": "A short official GitHub video that introduces gh-secure, a GitHub CLI extension for enabling security features on public repositories. The video has a GitHub gradient background, a title, and a QR code to https://github.com/GitHubSecurityLab/gh-secure.",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/github-gh-secure.mp4"
+        },
+        {
+          "title": "Dependabot Q&A",
+          "description": "Dependabot Q&A",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/github-gh-t-question-dependabot.mp4"
+        },
+        {
+          "title": "GitHub Package Firewall: Stop Risky Packages at Install",
+          "description": "A narrated explainer video. The package firewall lets enterprise admins set one install-time policy that blocks risky npm packages before they reach developer machines, AI agents, and CI runners, with an exception workflow for packages that teams need.",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/github-package-firewall.mp4",
+          "captions": "../videos/GitHub Advanced Security - Found means fixed/github-package-firewall.vtt"
+        },
+        {
+          "title": "GitHub Package Firewall Quiz",
+          "description": "",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/github-package-firewall-quiz.mp4"
+        },
+        {
+          "title": "Review security findings without leaving your pull request",
+          "description": "A narrated explainer video. CodeQL and AI Scan bring complementary security analyses into the pull request that you're already reviewing. It shows how to tell the two apart by their CodeQL and AI labels, how to read a CodeQL finding and use Show paths to follow the analysis trace, and how AI Scan adds advisory findings with an explanation and a suggested remediation for selected gaps in CodeQL coverage, such as Shell and Terraform.",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/github-pr-security-codeql-aiscan.mp4"
+        },
+        {
+          "title": "Quiz: Which statements about GitHub AI Scan on pull requests are true?",
+          "description": "An animated multiple-choice quiz about GitHub Advanced Security. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. AI Scan complements CodeQL with advisory findings on pull requests.",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/github-q-question-ai-scan-pull-requests.mp4"
+        },
+        {
+          "title": "GitHub Secret Scanning: Catch Secrets Before They Leak",
+          "description": "A narrated explainer video. GitHub's purpose-built model reads the context of unstructured secrets, such as passwords, so push protection and secret scanning catch real secrets before they're exposed.",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/github-secret-detection-model.mp4",
+          "captions": "../videos/GitHub Advanced Security - Found means fixed/github-secret-detection-model.vtt"
+        },
+        {
+          "title": "Quiz: Your team wants designated people to approve secret-block bypass requests. Which control fits?",
+          "description": "An animated multiple-choice quiz about GitHub Advanced Security. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Delegated bypass controls who can bypass secret blocks and review other contributors' bypass requests.",
+          "path": "../videos/GitHub Advanced Security - Found means fixed/question-secret-push-protection.mp4"
+        }
+      ]
+    },
+    {
+      "title": "GitHub Copilot",
+      "description": "Automations, Metrics, Code Review, Cloud Agent",
+      "icon": "sparkles-fill",
+      "videos": [
+        {
+          "title": "Cautious Issue Triage with GitHub Agentic Workflows",
+          "description": "A demo of cautious issue triage with GitHub Agentic Workflows. It shows agent automation controls in GitHub Issues and includes a QR code to the GitHub Changelog article.",
+          "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/agent-automation-cautious-demo-qr.mp4"
+        },
+        {
+          "title": "Agent automation controls in GitHub issues",
+          "description": "GitHub Issues added approval, confidence, and rationale controls for agent automations. Agents can automatically make high-confidence issue changes while holding lower-confidence actions for human review, with an audit trail explaining each change.",
+          "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/agent-automation-controls.mp4",
+          "captions": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/agent-automation-controls.vtt"
+        },
+        {
+          "title": "Quiz: On GitHub.com, must Copilot cloud agent open a pull request before it can work on code?",
+          "description": "An animated multiple-choice quiz about GitHub Copilot: Automation, Metrics, Cloud Agent. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. On GitHub.com, Copilot can work on a branch first. Other integrations can require a pull request.",
+          "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/a-question-cloud-agent-branch-first.mp4"
+        },
+        {
+          "title": "GitHub Copilot: Automations",
+          "description": "A demo of automations in the GitHub Copilot app: tasks Copilot runs for you, on a schedule or when something happens. It shows how to describe a task in one sentence so Copilot sets up the automation, and then chains automations together: one files a bug, the next fixes it and opens a pull request, another tests the fix, and a failed run starts an investigation. The pull request is then ready for a person to review and merge.",
+          "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-automations.mp4"
+        },
+        {
+          "title": "GitHub Copilot: From Mobile to VS Code, Automations, and Secure Pull Requests",
+          "description": "A captioned keynote demo of mobile-to-VS Code session continuity, Sentry canvases, automations, code scanning and Agentic Autofix, AI push protection, Copilot Code Review, stacked pull requests, and Agent Merge.",
+          "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-continuity-automations-and-security.mp4",
+          "captions": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-continuity-automations-and-security.vtt"
+        },
+        {
+          "title": "Quiz: A cloud Copilot automation is private to its creator. Who can see the sessions it starts?",
+          "description": "An animated multiple-choice quiz about GitHub Copilot: Automation, Metrics, Cloud Agent. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. The definition is private, but repository collaborators can see session prompts and logs.",
+          "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-ma-question-copilot-automation-session-visibility.mp4"
+        },
+        {
+          "title": "GitHub Copilot Usage Metrics: See Which Tools Drive Usage",
+          "description": "A narrated explainer video. Show that the usage metrics API now counts model requests from tools outside the IDE in a new totals_by_client array, what each entry shows, and how to read it from a real report with gh and jq.",
+          "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-metrics-by-client.mp4",
+          "captions": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-metrics-by-client.vtt"
+        },
+        {
+          "title": "GitHub Copilot Usage Metrics: Impact Dashboard",
+          "description": "A narrated explainer video. Show that the impact dashboard groups users into adoption cohorts by how they use Copilot, compares engaged users with passive users, and gives next steps to deepen adoption.",
+          "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-metrics-impact-dashboard.mp4",
+          "captions": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-metrics-impact-dashboard.vtt"
+        },
+        {
+          "title": "Quiz: What determines adoption depth in Copilot's impact dashboard?",
+          "description": "An animated multiple-choice quiz about GitHub Copilot. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Cohorts reflect the capabilities used with qualifying engagement, not just activity volume or PR output.",
+          "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-n-question-copilot-impact-adoption-depth.mp4"
+        },
+        {
+          "title": "GitHub Copilot App: Projects, Library, and Automations",
+          "description": "A captioned keynote demo of multi-repository projects, shared design, Slack, and Teams context, generated marketing videos in the Library, video automations, and local and cloud agents with pull request results.",
+          "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-projects-library-and-automations.mp4",
+          "captions": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-projects-library-and-automations.vtt"
+        },
+        {
+          "title": "FinOps for GitHub Copilot",
+          "description": "A narrated explainer video. Show how GitHub Copilot helps enterprises inform, govern, and guide AI consumption so they can scale developer productivity with financial discipline.",
+          "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/finops-for-github-copilot.mp4",
+          "captions": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/finops-for-github-copilot.vtt"
+        },
+        {
+          "title": "Quiz: What does the Copilot impact dashboard's adoption multiplier compare?",
+          "description": "An animated multiple-choice quiz about GitHub Copilot: Automation, Metrics, Cloud Agent. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. It compares engaged and passive users, not the same users before and after adoption.",
+          "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/question-metrics-impact-interpretation.mp4"
+        }
+      ]
+    },
+    {
+      "title": "GitHub Copilot",
+      "description": "Desktop App, CLI, SDK",
+      "icon": "device-desktop",
+      "videos": [
+        {
+          "title": "Quiz: You select a local Ollama model in GitHub Copilot CLI. Does that enable offline mode or disable telemetry?",
+          "description": "An animated multiple-choice quiz about GitHub Copilot: App, CLI, SDK. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Selecting a local model does not enable offline mode or disable GitHub telemetry.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/a-question-cli-local-model-network-behavior.mp4"
+        },
+        {
+          "title": "GitHub Copilot app: Computer Use",
+          "description": "A short demo with music and no narration. In the GitHub Copilot app, a user asks Copilot to submit an expense report for a tagged July 8 flight. Copilot uses Computer Use tools to operate Safari, fills in the expense portal, and submits the report for approval. The video ends with gh.io/ComputerUse.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/computer-use.mp4"
+        },
+        {
+          "title": "GitHub Copilot App: Track Your Work with Dashboards",
+          "description": "A narrated explainer video. Dashboards in the GitHub Copilot app put your issues, pull requests, and data from connected sources in one place, with widgets that you can filter, act on, add, and manage.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-app-dashboards.mp4",
+          "captions": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-app-dashboards.vtt"
+        },
+        {
+          "title": "GitHub Copilot app for Beginners: Course Overview",
+          "description": "A course overview video with music and no narration. It shows real screenshots of the GitHub Copilot app and the chapters of the free, open-source course, which teaches developers who are new to agentic development how to direct AI coding agents from one desktop app. Course: github.com/github/copilot-app-for-beginners.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-app-for-beginners-overview.mp4"
+        },
+        {
+          "title": "GitHub Copilot App: Image Generation",
+          "description": "A demo of image generation in the GitHub Copilot app: generate images right inside GitHub Copilot. It shows how to generate an app icon for a website, ask for five homepage redesign mocks and flip through them full size, have Copilot build the chosen mock as a real page, and restyle or clean up an existing product photo. It also shows how to turn on the \"Made with AI\" setting, which adds a watermark to all images that AI creates.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-app-image-generation.mp4"
+        },
+        {
+          "title": "GitHub Copilot App: Work Toward a Goal with Projects",
+          "description": "A narrated explainer video. Show why Projects help with a goal that spans several sessions, then show a real project: add a repository and a feedback file, assign a task, follow a session in Overview, open its report, and set up a weekly automation.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-app-projects.mp4",
+          "captions": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-app-projects.vtt"
+        },
+        {
+          "title": "GitHub Copilot: Automations",
+          "description": "A demo of automations in the GitHub Copilot app: tasks Copilot runs for you, on a schedule or when something happens. It shows how to describe a task in one sentence so Copilot sets up the automation, and then chains automations together: one files a bug, the next fixes it and opens a pull request, another tests the fix, and a failed run starts an investigation. The pull request is then ready for a person to review and merge.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-automations.mp4"
+        },
+        {
+          "title": "Quiz: You enable local sandboxing in GitHub Copilot CLI. Does that also enable it in the Copilot app?",
+          "description": "An animated multiple-choice quiz about GitHub Copilot: App, CLI, SDK. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Enabling local sandboxing in the CLI does not change the Copilot app's sandbox settings.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-b-question-copilot-app-local-sandboxing-default.mp4"
+        },
+        {
+          "title": "GitHub Copilot CLI: Dynamic Workflows",
+          "description": "A narrated demo of the /workflows command in GitHub Copilot CLI. It records a real release-readiness check on a sample app and explains what dynamic workflows are and why you would use them.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-cli-dynamic-workflows.mp4",
+          "captions": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-cli-dynamic-workflows.vtt"
+        },
+        {
+          "title": "GitHub Copilot CLI: Parallel Work with /fleet",
+          "description": "A narrated demo of the /fleet command in GitHub Copilot CLI. It records a real run where three subagents, each with its own model, work in parallel on a sample Python app, shows how to watch them with /tasks, and explains when parallel work pays off.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-cli-fleet.mp4",
+          "captions": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-cli-fleet.vtt"
+        },
+        {
+          "title": "GitHub Copilot CLI for Beginners: Course Overview",
+          "description": "A course overview video with music and no narration. It uses real GitHub Copilot CLI recordings to show the free, open-source course, where learners improve one app chapter by chapter, from the first prompt to a merged pull request. Course: github.com/github/copilot-cli-for-beginners.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-cli-for-beginners-overview.mp4"
+        },
+        {
+          "title": "GitHub Copilot App: Connectors, Fusion, Canvases, and Dreaming",
+          "description": "A captioned keynote demo of connectors for team context, Copilot Fusion model selection, browser canvases for testing a Coffee Passport app, and Dreaming to update instructions and memories.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-connectors-fusion-and-dreaming.mp4",
+          "captions": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-connectors-fusion-and-dreaming.vtt"
+        },
+        {
+          "title": "GitHub Copilot: From Mobile to VS Code, Automations, and Secure Pull Requests",
+          "description": "A captioned keynote demo of mobile-to-VS Code session continuity, Sentry canvases, automations, code scanning and Agentic Autofix, AI push protection, Copilot Code Review, stacked pull requests, and Agent Merge.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-continuity-automations-and-security.mp4",
+          "captions": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-continuity-automations-and-security.vtt"
+        },
+        {
+          "title": "GitHub Copilot App: Projects, Library, and Automations",
+          "description": "A captioned keynote demo of multi-repository projects, shared design, Slack, and Teams context, generated marketing videos in the Library, video automations, and local and cloud agents with pull request results.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-projects-library-and-automations.mp4",
+          "captions": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-projects-library-and-automations.vtt"
+        },
+        {
+          "title": "Using the Microsoft Copilot SDK",
+          "description": "A narrated explainer video. Explain what the Microsoft Copilot SDK is and its basic API, then show the GitHub Copilot app building a real support chat with a custom get_order tool, a scoped session, and streamed answers.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-sdk-support-assistant.mp4",
+          "captions": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-sdk-support-assistant.vtt"
+        },
+        {
+          "title": "Using the Foundry Canvas in GitHub Copilot app",
+          "description": "Using the Foundry Canvas in GitHub Copilot app",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/foundry-canvas-demo.mp4"
+        },
+        {
+          "title": "GitHub Copilot App: Understand Your AI Usage",
+          "description": "A narrated demo of the My AI Usage canvas in the GitHub Copilot app. The Usage tab shows AI units, tokens, and model calls over time, the models you use most with their sessions, a token split, your top repositories, and the time of day when your sessions start. The Insights tab generates a brief with the insight of the day, its evidence, and experiments to try, such as keeping related work in one session or comparing reasoning effort levels. You can track each experiment, ask questions in chat, and work with Copilot more efficiently.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/ghcp-ai-usage-canvas-demo.mp4"
+        },
+        {
+          "title": "Using GitHub Copilot Fusion",
+          "description": "A narrated explainer video. Explain how Copilot Fusion routes and orchestrates models with three execution patterns and effort levels, show a real Max run in the GitHub Copilot app that uses Cascade, show its DeepSWE and Artificial Analysis benchmark results, and cover admin control and billing.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/github-copilot-fusion.mp4",
+          "captions": "../videos/GitHub Copilot - Desktop App, CLI, SDK/github-copilot-fusion.vtt"
+        },
+        {
+          "title": "Quiz: In Copilot SDK, which custom-tool design passes a product ID to your inventory API code?",
+          "description": "An animated multiple-choice quiz about GitHub Copilot: App, CLI, SDK. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. The tool describes its inputs; its handler executes your code and returns the result to the agent.",
+          "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/z-question-copilot-sdk-custom-tools.mp4"
+        }
+      ]
+    },
+    {
+      "title": "GitHub Enterprise",
+      "description": "Scale AI-powered development with confidence",
+      "icon": "stack",
+      "videos": [
+        {
+          "title": "GitHub Enterprise: Manage Billing with the REST API",
+          "description": "A narrated explainer video. You can create a cost center, add a team, set a budget for its users, and check AI credit usage with the billing REST API, and the results show in the billing pages.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/billing-rest-api.mp4",
+          "captions": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/billing-rest-api.vtt"
+        },
+        {
+          "title": "GitHub Enterprise: Delegate Cost Center Budgets",
+          "description": "A narrated walkthrough (about 3 min 24 s) of delegating cost center budgets in GitHub Enterprise. Today, enterprise owners and billing managers see all billing data. The video shows an enterprise owner creating a custom role with the permission to create, edit, and delete budgets for a cost center, and assigning it to a person for one cost center. Then it shows what that cost center manager sees: a shorter billing menu, only their own cost center, a new Actions budget, and user budgets with AI usage. It also shows a view-only role that can view budgets and usage but can't edit them, and that enterprise owners keep full access.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/budget-delegation.mp4",
+          "captions": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/budget-delegation.vtt"
+        },
+        {
+          "title": "GitHub Enterprise: Budgets and Alerts",
+          "description": "A narrated explainer video. Show how to create a budget with a type and a scope, get alerts at 75%, 90%, and 100%, and choose when a budget stops usage, without overlapping budgets.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/budgets-and-alerts.mp4",
+          "captions": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/budgets-and-alerts.vtt"
+        },
+        {
+          "title": "Quiz: You disable Copilot cloud agent in enterprise AI Controls. What happens to third-party agents on GitHub.com?",
+          "description": "An animated multiple-choice quiz about GitHub Enterprise. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Copilot and third-party cloud agents have separate policies; configure each agent type independently.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/ca-question-enterprise-agent-policy-independence.mp4"
+        },
+        {
+          "title": "GitHub Copilot Usage Metrics: See Which Tools Drive Usage",
+          "description": "A narrated explainer video. Show that the usage metrics API now counts model requests from tools outside the IDE in a new totals_by_client array, what each entry shows, and how to read it from a real report with gh and jq.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/copilot-metrics-by-client.mp4",
+          "captions": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/copilot-metrics-by-client.vtt"
+        },
+        {
+          "title": "Quiz: What can admins control with the fusionTier managed-settings key?",
+          "description": "An animated multiple-choice quiz about GitHub Enterprise. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. fusionTier sets the Fusion effort level. A value locks it for users, and \"overridable\" lets enterprise teams change it.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/copilot-n-question-enterprise-fusion-tier.mp4"
+        },
+        {
+          "title": "GitHub Enterprise: Cost Centers",
+          "description": "A narrated explainer video. Show what a cost center contains, how each kind of product is charged to it, and how the docs example allocates charges, so viewers can attribute spending to business units.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/cost-centers.mp4",
+          "captions": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/cost-centers.vtt"
+        },
+        {
+          "title": "Quiz: What does agent session streaming give enterprise admins visibility into?",
+          "description": "An animated multiple-choice quiz about GitHub Enterprise. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Agent session streaming shows prompts, responses, and tool calls from Copilot clients across the enterprise.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/cp-question-enterprise-agent-session-streaming.mp4"
+        },
+        {
+          "title": "FinOps for GitHub Copilot",
+          "description": "A narrated explainer video. Show how GitHub Copilot helps enterprises inform, govern, and guide AI consumption so they can scale developer productivity with financial discipline.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/finops-for-github-copilot.mp4",
+          "captions": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/finops-for-github-copilot.vtt"
+        },
+        {
+          "title": "GitHub: Stacked Pull Requests",
+          "description": "A narrated explainer video. Show why dependent changes slow teams down, what a stack of pull requests is, and how the gh stack extension builds, submits, merges, and syncs a real stack.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/gh-stacked-prs.mp4",
+          "captions": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/gh-stacked-prs.vtt"
+        },
+        {
+          "title": "Quiz: How can you configure the \"Default availability for released models\" policy at the enterprise level?",
+          "description": "An animated multiple-choice quiz about GitHub Enterprise. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. The policy has three enterprise states. Pre-GA, open weight, and some other models are never affected.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/gh-t-question-enterprise-default-model-availability.mp4"
+        },
+        {
+          "title": "GitHub Code Quality: Catch Issues Before They Merge",
+          "description": "A narrated demo video. GitHub Code Quality catches a reliability issue (a format string that can throw at runtime) with CodeQL and flags it on the changed pull request lines. Copilot Autofix proposes the correction in the same pull request, and Rulesets enforce the quality standard before merge. Repository-level views help teams prioritize existing reliability and maintainability work. It ends with a QR code to the GitHub Code Quality page.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/github-code-quality.mp4",
+          "captions": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/github-code-quality.vtt"
+        },
+        {
+          "title": "GitHub Issues: Issue Intents",
+          "description": "A narrated demo by Gwyneth Peña-Siguenza (about 3 min 45 s). It shows how issue intents keep issue metadata up to date. Users filter issues with pending suggestions, read the confidence and rationale of each suggestion, and accept or decline it. It also shows the automation levels (full control, cautious, balanced), a GitHub Agentic Workflow in Markdown that sets issue intent for issue-type and issue-field actions, and the safe outputs in GitHub Actions.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/issue-intents-v2.mp4"
+        },
+        {
+          "title": "Quiz: What does setting model to \"auto\" in managed settings do?",
+          "description": "An animated multiple-choice quiz about GitHub Enterprise. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. New sessions select a model automatically, unless the user selects a different model for a conversation.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/question-enterprise-managed-settings-auto-model.mp4"
+        },
+        {
+          "title": "GitHub Actions: Reusable Workflows",
+          "description": "A narrated explainer video. Show that a caller workflow job calls one reusable workflow with the uses keyword, so teams reuse a workflow instead of copying it.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/reusable-workflows.mp4",
+          "captions": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/reusable-workflows.vtt"
+        },
+        {
+          "title": "5 GitHub shortcuts you probably don't know about",
+          "description": "A short video by Gwyneth Peña-Siguenza (about 1 min 5 s) that shows five useful shortcuts on github.com.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/shortcuts-ghcom.mp4"
+        },
+        {
+          "title": "Quiz: Which Copilot clients does GitHub support with managed settings?",
+          "description": "An animated multiple-choice quiz about GitHub Enterprise. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Every one of these clients supports managed settings, but the keys that apply are different for each client.",
+          "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/z-question-enterprise-managed-settings-clients.mp4"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+node_modules/
+data/
+# Video files (copied from SharePoint). Keep only the empty folder.
+videos/*
+!videos/.gitkeep
+.DS_Store

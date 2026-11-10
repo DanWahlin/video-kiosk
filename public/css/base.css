@@ -1,0 +1,262 @@
+/* Fonts: Mona Sans (GitHub's open source typeface, OFL-1.1), served locally so the kiosk works offline. */
+@font-face {
+  font-family: 'Mona Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 900;
+  src: url('/fonts/mona-sans-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Mona Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 900;
+  src: url('/fonts/mona-sans-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ---------------------------------------------------------------------------
+   Themes. Colors that the 3D scene mixes at run time are "r g b" triples.
+   --palette: the folder colors, in order. --active: the color of the selected item.
+   --accent-2: the second color in gradients.
+   --------------------------------------------------------------------------- */
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg-0: #050816;
+  --bg-1: #0c1236;
+  --text: #f4f7ff;
+  --text-2: #c3cbe6;
+  --text-3: #8d97bd;
+  --card-text: #ffffff;
+  --card-text-2: #dbe3ff;
+  --glass-base: rgb(9 13 38 / 0.62);
+  --glass-hi: rgb(255 255 255 / 0.32);
+  --pill-bg: rgb(16 22 58 / 0.55);
+  --pill-border: rgb(120 150 255 / 0.35);
+  --palette: 59 130 246, 99 102 241, 139 92 246, 168 85 247;
+  --active: 34 211 238;
+  --accent-2: 139 92 246;
+  --icon-top: 255 255 255;
+  --aurora-a: 56 189 248;
+  --aurora-b: 139 92 246;
+  --aurora-alpha: 0.32;
+  --glow: 1;
+  --reflect: 0.2;
+  --tracking: 0.32em;
+  --shadow: 0 30px 60px rgb(0 0 0 / 0.45);
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --bg-0: #f9fbff;
+  --bg-1: #e6ecfb;
+  --text: #17204a;
+  --text-2: #3a4470;
+  --text-3: #5d678f;
+  --card-text: #141c44;
+  --card-text-2: #2c365e;
+  --glass-base: rgb(255 255 255 / 0.72);
+  --glass-hi: rgb(255 255 255 / 0.95);
+  --pill-bg: rgb(255 255 255 / 0.7);
+  --pill-border: rgb(120 140 220 / 0.4);
+  --palette: 96 165 250, 129 140 248, 167 139 250, 192 132 252;
+  --active: 6 182 212;
+  --accent-2: 167 139 250;
+  --icon-top: 37 99 235;
+  --aurora-a: 103 232 249;
+  --aurora-b: 196 181 253;
+  --aurora-alpha: 0.45;
+  --glow: 0.55;
+  --reflect: 0.28;
+  --tracking: 0.32em;
+  --shadow: 0 24px 50px rgb(60 80 160 / 0.18);
+}
+
+/* GitHub brand themes (brand.github.com): mostly neutrals with small moments of GitHub Green,
+   Mona Sans with no added letter spacing, and logos in one solid color with no effects. */
+[data-theme='github-dark'] {
+  color-scheme: dark;
+  --bg-0: #101411;
+  --bg-1: #18201b;
+  --text: #f2f5f3;
+  --text-2: #b6bfb8;
+  --text-3: #909692;
+  --card-text: #f2f5f3;
+  --card-text-2: #b6bfb8;
+  --glass-base: rgb(35 41 37 / 0.72);
+  --glass-hi: rgb(242 245 243 / 0.16);
+  --pill-bg: rgb(35 41 37 / 0.75);
+  --pill-border: rgb(144 150 146 / 0.4);
+  --palette: 144 150 146;
+  --active: 15 191 62;
+  --accent-2: 95 237 131;
+  --icon-top: 242 245 243;
+  --aurora-a: 15 191 62;
+  --aurora-b: 10 36 27;
+  --aurora-alpha: 0.18;
+  --glow: 0.7;
+  --reflect: 0.14;
+  --tracking: 0;
+  --shadow: 0 30px 60px rgb(0 0 0 / 0.5);
+}
+
+[data-theme='github-light'] {
+  color-scheme: light;
+  --bg-0: #ffffff;
+  --bg-1: #f2f5f3;
+  --text: #101411;
+  --text-2: #232925;
+  --text-3: #5b625d;
+  --card-text: #101411;
+  --card-text-2: #232925;
+  --glass-base: rgb(255 255 255 / 0.85);
+  --glass-hi: rgb(255 255 255 / 1);
+  --pill-bg: rgb(255 255 255 / 0.85);
+  --pill-border: rgb(182 191 184 / 0.9);
+  --palette: 182 191 184;
+  --active: 8 135 43;
+  --accent-2: 15 191 62;
+  --icon-top: 16 20 17;
+  --aurora-a: 140 242 166;
+  --aurora-b: 228 235 230;
+  --aurora-alpha: 0.22;
+  --glow: 0.45;
+  --reflect: 0.16;
+  --tracking: 0;
+  --shadow: 0 20px 44px rgb(16 20 17 / 0.12);
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+body {
+  font-family: 'Mona Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-feature-settings: 'liga' 0, 'calt' 1;
+  color: var(--text);
+  background: var(--bg-0);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+[hidden] {
+  display: none !important;
+}
+.icon svg,
+svg.octicon {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  display: block;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Backdrop: gradient, slow aurora, light arcs, and a floor glow
+   --------------------------------------------------------------------------- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% -10%, var(--bg-1), transparent 60%),
+    radial-gradient(90% 60% at 50% 115%, var(--bg-1), transparent 70%),
+    var(--bg-0);
+  transition: background 0.4s ease;
+}
+.aurora {
+  position: absolute;
+  width: 60vmax;
+  height: 60vmax;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: var(--aurora-alpha);
+  will-change: transform;
+}
+.aurora.a1 {
+  background: rgb(var(--aurora-a));
+  left: -18vmax;
+  top: -26vmax;
+  animation: drift-a 26s ease-in-out infinite alternate;
+}
+.aurora.a2 {
+  background: rgb(var(--aurora-b));
+  right: -20vmax;
+  bottom: -30vmax;
+  animation: drift-b 32s ease-in-out infinite alternate;
+}
+@keyframes drift-a {
+  to {
+    transform: translate(14vmax, 8vmax) scale(1.15);
+  }
+}
+@keyframes drift-b {
+  to {
+    transform: translate(-12vmax, -10vmax) scale(1.1);
+  }
+}
+
+/* Thin elliptical light arcs. The mask keeps only a thin ring of the gradient. */
+.arc {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  background: linear-gradient(90deg, transparent 4%, rgb(var(--aurora-a)) 30%, rgb(var(--accent-2)) 70%, transparent 96%);
+  -webkit-mask: radial-gradient(farthest-side at 50% 100%, transparent 98.6%, #000 99.2%, #000 99.6%, transparent 100%);
+  mask: radial-gradient(farthest-side at 50% 100%, transparent 98.6%, #000 99.2%, #000 99.6%, transparent 100%);
+  filter: drop-shadow(0 0 6px rgb(var(--aurora-a) / calc(0.8 * var(--glow))));
+  opacity: calc(0.5 + 0.4 * var(--glow));
+}
+.arc.arc-1 {
+  width: 92vw;
+  height: 34vh;
+  top: 1vh;
+}
+.arc.arc-2 {
+  width: 130vw;
+  height: 52vh;
+  top: -6vh;
+  opacity: calc(0.25 + 0.3 * var(--glow));
+}
+.floor-glow {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: -12vh;
+  height: 34vh;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(var(--active) / calc(0.22 * var(--glow))), transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora {
+    animation: none;
+  }
+}

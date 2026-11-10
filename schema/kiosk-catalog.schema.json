@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://videos-kiosk.local/schema/kiosk-catalog.schema.json",
+  "title": "Video kiosk catalog",
+  "description": "Folders and videos that the video kiosk shows. Relative paths resolve from the folder that contains the catalog file.",
+  "type": "object",
+  "required": ["title", "icon", "folders"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "title": {
+      "description": "Main heading at the top of every kiosk screen.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "subtitle": {
+      "description": "Optional line below the title.",
+      "type": "string",
+      "maxLength": 120
+    },
+    "icon": { "$ref": "#/$defs/icon", "description": "Icon above the title." },
+    "iconLight": {
+      "$ref": "#/$defs/icon",
+      "description": "Optional icon for the Light and GitHub Light themes. Use it when \"icon\" is a white logo that does not show on a light background."
+    },
+    "folders": {
+      "description": "Top-level folders. The kiosk shows them in the 3D carousel, in this order.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/folder" }
+    }
+  },
+  "$defs": {
+    "icon": {
+      "description": "A Primer Octicon name (for example \"infinity\", \"shield-check\", \"stack\"; see https://primer.style/octicons) or a path or URL to an .svg, .png, .jpg, .jpeg, .gif, or .webp image.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^([a-z0-9]+(-[a-z0-9]+)*|.+\\.([sS][vV][gG]|[pP][nN][gG]|[jJ][pP][eE]?[gG]|[gG][iI][fF]|[wW][eE][bB][pP]))$"
+    },
+    "folder": {
+      "type": "object",
+      "required": ["title", "description", "videos"],
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "description": { "type": "string", "maxLength": 200 },
+        "icon": { "$ref": "#/$defs/icon", "description": "Icon on the folder card. Default: \"file-directory\"." },
+        "videos": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/video" }
+        }
+      }
+    },
+    "video": {
+      "type": "object",
+      "required": ["title", "description", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 140 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "path": {
+          "description": "Path or http(s) URL of the video file (.mp4, .m4v, .webm, .mov, or .ogv).",
+          "type": "string",
+          "minLength": 1
+        },
+        "captions": {
+          "description": "Optional path or URL of a WebVTT (.vtt) captions file.",
+          "type": "string",
+          "pattern": "\\.[vV][tT][tT]$"
+        },
+        "thumbnail": {
+          "description": "Optional path or URL of a thumbnail image. If you omit it, the server makes one from the video (needs ffmpeg).",
+          "type": "string",
+          "minLength": 1
+        },
+        "duration": {
+          "description": "Optional length in seconds. If you omit it, the server reads it from the file (needs ffprobe).",
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    }
+  }
+}
