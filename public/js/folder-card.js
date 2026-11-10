@@ -26,7 +26,6 @@ export function folderCard(folder) {
     h(
       'div',
       { class: 'fcard-body' },
-      h('div', { class: 'fcard-back' }),
       h(
         'div',
         { class: 'fcard-front', html: WAVES },

@@ -6,6 +6,7 @@ import { createPlayer } from './player.js';
 const ATTRACT_AFTER_MS = 20_000;
 const ATTRACT_STEP_MS = 6_000;
 const CURSOR_HIDE_MS = 3_000;
+const SETTINGS_HOLD_MS = 3_000;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 export function createKiosk({ onExit }) {
@@ -13,6 +14,7 @@ export function createKiosk({ onExit }) {
   const home = $('#home');
   const folderScreen = $('#folder');
   const back = $('#back');
+  const fsBtn = $('#fullscreen');
   const list = $('.video-list', folderScreen);
   const listWrap = $('.list-wrap', folderScreen);
   const listDots = $('.dots', folderScreen);
@@ -27,7 +29,6 @@ export function createKiosk({ onExit }) {
   let idleResetDone = false;
   let lastAttract = 0;
   let timer = 0;
-  let usingFullscreen = false;
   let running = false;
 
   const carousel = new Carousel($('.stage', home), $('.carousel', home), {
@@ -47,6 +48,7 @@ export function createKiosk({ onExit }) {
     if (!res.ok) throw new Error(data.error || 'The catalog did not load.');
     catalog = data;
     applyTheme(catalog.settings.theme);
+    $('#player').dataset.ccSize = catalog.settings.captionSize;
     const lightTheme = catalog.settings.theme.endsWith('light');
     paintIcon($('.brand-icon', root), lightTheme && catalog.iconLight ? catalog.iconLight : catalog.icon);
     $('.brand-title', root).textContent = catalog.title;
@@ -268,7 +270,8 @@ export function createKiosk({ onExit }) {
   }
 
   function onKey(e) {
-    if (e.key === 'Escape') return exit();
+    // Esc only leaves full screen (the browser does that). Ctrl+Alt+S opens the settings.
+    if (e.ctrlKey && e.altKey && e.code === 'KeyS') return exit();
     noteInput();
     if (player.isOpen) {
       if (e.key === ' ' || e.key === 'Enter') e.preventDefault(), player.togglePlay();
@@ -284,22 +287,40 @@ export function createKiosk({ onExit }) {
     if (e.key === 'Enter' || e.key === ' ') e.preventDefault(), openFolder(carousel.index);
   }
 
-  function onFullscreenChange() {
-    if (usingFullscreen && !document.fullscreenElement) exit();
-  }
+  // ---- Full screen ----
+  // A browser in kiosk mode fills the screen without the Fullscreen API, so check the size too.
+  const isFullscreen = () =>
+    !!document.fullscreenElement || (Math.abs(innerWidth - screen.width) < 2 && Math.abs(innerHeight - screen.height) < 2);
+  const syncFullscreenButton = () => (fsBtn.hidden = isFullscreen());
+  const enterFullscreen = () => document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+  fsBtn.addEventListener('click', enterFullscreen);
+  $('#open-settings').addEventListener('click', () => exit());
+
+  // ---- Hidden way to the settings: hold the logo or title for 3 seconds ----
+  let holdTimer = 0;
+  const brand = $('.brand', root);
+  const endHold = () => {
+    clearTimeout(holdTimer);
+    brand.classList.remove('is-holding');
+  };
+  brand.addEventListener('pointerdown', (e) => {
+    if (!e.target.closest('.brand-icon, .brand-title')) return;
+    brand.classList.add('is-holding');
+    holdTimer = setTimeout(() => {
+      endHold();
+      exit();
+    }, SETTINGS_HOLD_MS);
+  });
+  for (const type of ['pointerup', 'pointerleave', 'pointercancel']) brand.addEventListener(type, endHold);
 
   // ---- Start and stop ----
   async function launch({ fullscreen }) {
-    if (fullscreen) {
-      // Must run first, while the click still counts as a user gesture.
-      usingFullscreen = true;
-      await document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => (usingFullscreen = false));
-    }
+    // Must run first, while the click still counts as a user gesture.
+    if (fullscreen) await enterFullscreen();
     try {
       await load();
     } catch (err) {
       if (document.fullscreenElement) await document.exitFullscreen().catch(() => {});
-      usingFullscreen = false;
       throw err;
     }
     running = true;
@@ -313,12 +334,14 @@ export function createKiosk({ onExit }) {
     lastInput = performance.now();
     idleResetDone = false;
     timer = setInterval(idleTick, 500);
+    syncFullscreenButton();
     addEventListener('keydown', onKey);
     addEventListener('pointerdown', noteInput, true);
     addEventListener('pointermove', noteInput, true);
     addEventListener('wheel', noteInput, true);
     addEventListener('contextmenu', preventMenu);
-    document.addEventListener('fullscreenchange', onFullscreenChange);
+    addEventListener('resize', syncFullscreenButton);
+    document.addEventListener('fullscreenchange', syncFullscreenButton);
   }
 
   const preventMenu = (e) => e.preventDefault();
@@ -326,6 +349,7 @@ export function createKiosk({ onExit }) {
   function exit() {
     if (!running) return;
     running = false;
+    endHold();
     if (player.isOpen) player.close('exit');
     clearInterval(timer);
     removeEventListener('keydown', onKey);
@@ -333,12 +357,12 @@ export function createKiosk({ onExit }) {
     removeEventListener('pointermove', noteInput, true);
     removeEventListener('wheel', noteInput, true);
     removeEventListener('contextmenu', preventMenu);
-    document.removeEventListener('fullscreenchange', onFullscreenChange);
+    removeEventListener('resize', syncFullscreenButton);
+    document.removeEventListener('fullscreenchange', syncFullscreenButton);
     root.hidden = true;
     root.classList.remove('hide-cursor');
     watched = new Set();
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    usingFullscreen = false;
     onExit?.();
   }
 

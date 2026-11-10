@@ -14,7 +14,7 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { quickXorHashFile } from '../lib/quickxorhash.js';
 import { validateCatalog } from '../lib/catalog.js';
-import { splitFolderName, prettifyFileName, VIDEO_EXTENSIONS } from '../lib/scan.js';
+import { splitFolderName, prettifyFileName, questionTitle, VIDEO_EXTENSIONS } from '../lib/scan.js';
 
 const { values: args } = parseArgs({
   options: {
@@ -178,7 +178,7 @@ for (const { folder, videos, vtts } of prepared) {
       [local.file.replace(/\.[^.]+$/, '.vtt')].find((f) => fs.existsSync(f));
 
     out.videos.push({
-      title: meta.title,
+      title: questionTitle(meta.title),
       description: meta.description ?? '',
       path: rel(local.file),
       ...(vttLocal ? { captions: rel(vttLocal) } : {}),

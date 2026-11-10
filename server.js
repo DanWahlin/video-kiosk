@@ -6,14 +6,16 @@ import express from 'express';
 import octicons from '@primer/octicons';
 import { readCatalogFile, validateCatalog, resolveCatalog, resolvePath, isUrl } from './lib/catalog.js';
 import { scanFolder } from './lib/scan.js';
-import { createSettingsStore, THEMES, IDLE_CHOICES } from './lib/settings.js';
+import { createSettingsStore, THEMES, IDLE_CHOICES, CAPTION_SIZES } from './lib/settings.js';
 import { createMediaTools } from './lib/media.js';
 
 const ROOT = import.meta.dirname;
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '127.0.0.1';
 const CATALOG_DIR = path.join(ROOT, 'catalogs');
-const UI_ICONS = ['arrow-left', 'check', 'check-circle-fill', 'chevron-left', 'chevron-right', 'file', 'file-directory', 'home', 'play', 'screen-full', 'video', 'x', 'alert', 'sync', 'download', 'comment'];
+// Folder mode can use only this folder and the folders inside it.
+const VIDEOS_DIR = path.join(ROOT, 'videos');
+const UI_ICONS = ['arrow-left', 'check', 'check-circle-fill', 'chevron-left', 'chevron-right', 'file', 'file-directory', 'home', 'play', 'screen-full', 'video', 'x', 'alert', 'sync', 'download', 'comment', 'gear'];
 
 const settingsStore = createSettingsStore(path.join(ROOT, 'data', 'settings.json'));
 const media = createMediaTools(path.join(ROOT, 'data', 'cache'));
@@ -22,13 +24,32 @@ const media = createMediaTools(path.join(ROOT, 'data', 'cache'));
 let active = null; // { raw, runtime, ready, version }
 let lastResult = { errors: ['Pick a JSON file or a folder.'], warnings: [], summary: null };
 
+const isDir = (p) => {
+  try {
+    return fs.statSync(p).isDirectory();
+  } catch {
+    return false;
+  }
+};
+// True when dir is base or inside it. Real paths stop a symbolic link from pointing outside.
+function insideVideos(dir) {
+  try {
+    const rel = path.relative(fs.realpathSync(VIDEOS_DIR), fs.realpathSync(dir));
+    return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
+  } catch {
+    return false;
+  }
+}
+
 function loadSource(source) {
-  if (!source?.path) return { errors: ['Pick a JSON file or a folder.'], warnings: [], summary: null };
+  if (!source?.path && source?.type !== 'folder') return { errors: ['Pick a JSON file or a folder.'], warnings: [], summary: null };
   if (source.type === 'folder') {
-    const dir = resolvePath(source.path, os.homedir());
-    if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return { errors: [`Folder not found: ${dir}`], warnings: [], summary: null };
+    // An empty folder path means the videos folder itself.
+    const dir = source.path ? resolvePath(source.path, VIDEOS_DIR) : VIDEOS_DIR;
+    if (!isDir(dir)) return { errors: [`Folder not found: ${dir}`], warnings: [], summary: null };
+    if (!insideVideos(dir)) return { errors: [`Pick a folder inside ${VIDEOS_DIR}`], warnings: [], summary: null };
     const catalog = scanFolder(dir, source);
-    if (!catalog.folders.length) return { errors: ['No subfolders with video files were found in this folder.'], warnings: [], summary: null };
+    if (!catalog.folders.length) return { errors: ['No video files were found in this folder.'], warnings: [], summary: null };
     return { catalog, baseDir: dir, ...validateCatalog(catalog, { baseDir: dir }) };
   }
   const read = readCatalogFile(resolvePath(source.path, os.homedir()));
@@ -73,10 +94,15 @@ function svg(name) {
 const iconForClient = (icon, url) => (icon.octicon ? { svg: svg(icon.octicon) } : { url });
 
 function settingsResponse() {
+  const settings = settingsStore.get();
+  // Folder sources outside the videos folder cannot load, so do not offer them as quick picks.
+  settings.recent = settings.recent.filter((r) => r.type !== 'folder' || insideVideos(r.path));
   return {
-    settings: settingsStore.get(),
+    settings,
+    videosDir: VIDEOS_DIR,
     themes: THEMES,
     idleChoices: IDLE_CHOICES,
+    captionSizes: CAPTION_SIZES,
     validation: lastResult,
     tools: media.available,
     bundled: fs.existsSync(CATALOG_DIR)
@@ -109,13 +135,14 @@ app.get('/api/settings', adminOnly, (_req, res) => res.json(settingsResponse()))
 
 app.put('/api/settings', adminOnly, (req, res) => {
   const before = settingsStore.get();
-  const patch = { ...req.body };
-  if (patch.source) {
-    const next = { ...before.source, ...patch.source };
-    if (next.path) patch.recent = [{ type: next.type, path: next.path }, ...before.recent.filter((r) => r.path !== next.path)];
+  const after = settingsStore.update(req.body);
+  if (JSON.stringify(after.source) !== JSON.stringify(before.source)) {
+    activate();
+    // Remember only sources that load, so a bad path never comes back as a quick pick.
+    if (after.source.path && !lastResult.errors.length) {
+      settingsStore.update({ recent: [{ type: after.source.type, path: after.source.path }, ...after.recent.filter((r) => r.path !== after.source.path)] });
+    }
   }
-  const after = settingsStore.update(patch);
-  if (JSON.stringify(after.source) !== JSON.stringify(before.source)) activate();
   res.json(settingsResponse());
 });
 
@@ -126,23 +153,32 @@ app.post('/api/reload', adminOnly, (_req, res) => {
 
 app.get('/api/browse', adminOnly, (req, res) => {
   const wantFiles = req.query.files === 'json';
-  let dir = typeof req.query.dir === 'string' && req.query.dir ? resolvePath(req.query.dir, os.homedir()) : os.homedir();
+  const base = wantFiles ? null : VIDEOS_DIR;
+  let dir = typeof req.query.dir === 'string' && req.query.dir ? resolvePath(req.query.dir, base ?? os.homedir()) : (base ?? os.homedir());
+  if (!isDir(dir) && fs.existsSync(dir)) dir = path.dirname(dir); // A file: open its folder.
+  // A folder that no longer exists opens its nearest parent.
+  while (!isDir(dir) && path.dirname(dir) !== dir) dir = path.dirname(dir);
+  if (base && !insideVideos(dir)) dir = base;
+  if (!isDir(dir)) return res.status(400).json({ error: base ? `The videos folder was not found: ${base}` : `Cannot open ${dir}` });
   try {
-    if (fs.statSync(dir).isFile()) dir = path.dirname(dir);
     const entries = fs
       .readdirSync(dir, { withFileTypes: true })
       .filter((e) => !e.name.startsWith('.'))
       .filter((e) => e.isDirectory() || (wantFiles && e.isFile() && e.name.toLowerCase().endsWith('.json')))
       .map((e) => ({ name: e.name, path: path.join(dir, e.name), kind: e.isDirectory() ? 'dir' : 'json' }))
+      .filter((e) => !base || insideVideos(e.path))
       .sort((a, b) => (a.kind === b.kind ? a.name.localeCompare(b.name, undefined, { numeric: true }) : a.kind === 'dir' ? -1 : 1));
-    const shortcuts = [
-      { name: 'Home', path: os.homedir() },
-      { name: 'Desktop', path: path.join(os.homedir(), 'Desktop') },
-      { name: 'Documents', path: path.join(os.homedir(), 'Documents') },
-      { name: 'App catalogs', path: CATALOG_DIR },
-      ...(process.platform === 'darwin' ? [{ name: 'Drives', path: '/Volumes' }] : []),
-    ].filter((s) => fs.existsSync(s.path));
-    res.json({ dir, parent: path.dirname(dir) === dir ? null : path.dirname(dir), entries, shortcuts });
+    const shortcuts = base
+      ? [{ name: 'Videos', path: base }]
+      : [
+          { name: 'Home', path: os.homedir() },
+          { name: 'Desktop', path: path.join(os.homedir(), 'Desktop') },
+          { name: 'Documents', path: path.join(os.homedir(), 'Documents') },
+          { name: 'App catalogs', path: CATALOG_DIR },
+          ...(process.platform === 'darwin' ? [{ name: 'Drives', path: '/Volumes' }] : []),
+        ].filter((s) => fs.existsSync(s.path));
+    const atTop = base ? path.resolve(dir) === path.resolve(base) : path.dirname(dir) === dir;
+    res.json({ dir, root: base, parent: atTop ? null : path.dirname(dir), entries, shortcuts });
   } catch (err) {
     res.status(400).json({ error: `Cannot open ${dir}: ${err.code ?? err.message}` });
   }
@@ -160,7 +196,7 @@ app.get('/api/catalog', async (_req, res) => {
   const s = settingsStore.get();
   res.json({
     version,
-    settings: { theme: s.theme, idleSeconds: s.idleSeconds, attractMode: s.attractMode, captions: s.captions },
+    settings: { theme: s.theme, idleSeconds: s.idleSeconds, attractMode: s.attractMode, captions: s.captions, captionSize: s.captionSize },
     title: runtime.title,
     subtitle: runtime.subtitle,
     icon: iconForClient(runtime.icon, `/media/icon?v=${version}`),

@@ -85,12 +85,19 @@
               <div><strong>Captions on by default</strong><span>Show captions when a video has a .vtt file. Viewers can turn them on or off with the CC button in the player.</span></div>
               <button id="captions" class="switch" type="button" role="switch" aria-checked="true" aria-label="Captions"></button>
             </div>
+            <div class="option">
+              <div><strong>Caption size</strong><span>The size of the caption text in the player.</span></div>
+              <select id="caption-size"></select>
+            </div>
           </div>
         </section>
 
         <section class="card launch">
           <p>
-            The kiosk opens in full screen. Press <kbd>Esc</kbd> to exit and come back to this page.<br />
+            The kiosk opens in full screen. <kbd>Esc</kbd> exits full screen; the kiosk keeps running and shows a
+            <strong>Full screen</strong> button.<br />
+            To come back to this page, press and hold the logo or the title for 3 seconds, or press
+            <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>S</kbd>.<br />
             To start a browser directly in kiosk mode, open <code id="kiosk-url"></code>
           </p>
           <button id="launch" class="btn btn-primary" type="button"><span class="icon" data-icon="screen-full"></span>Launch kiosk</button>
@@ -144,14 +151,14 @@
         <div class="dots" aria-label="Pages"></div>
       </section>
       <button id="back" class="pill back-btn" type="button" hidden><span class="icon" data-icon="arrow-left"></span>Back</button>
+      <button id="fullscreen" class="pill fs-btn" type="button" hidden><span class="icon" data-icon="screen-full"></span>Full screen</button>
+      <button id="open-settings" class="pill settings-btn" type="button" aria-label="Settings" title="Settings"><span class="icon" data-icon="gear"></span></button>
 
       <div id="player" class="player" hidden>
-        <video playsinline preload="auto"></video>
+        <video playsinline preload="auto" disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback"></video>
+        <div class="captions" aria-hidden="true"></div>
+        <button class="pill close player-back" type="button" aria-label="Back"><span class="icon" data-icon="arrow-left"></span><span class="back-label">Back</span></button>
         <div class="player-ui">
-          <div class="player-top">
-            <button class="pill close" type="button"><span class="icon" data-icon="arrow-left"></span>Back to videos</button>
-            <div class="player-title"></div>
-          </div>
           <button class="big-play" type="button" aria-label="Play" hidden><span class="icon" data-icon="play"></span></button>
           <div class="player-bottom">
             <button class="round-btn toggle" type="button" aria-label="Pause"><span class="icon"></span></button>

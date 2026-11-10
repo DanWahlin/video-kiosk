@@ -198,7 +198,7 @@ button.pill:active {
 .platform {
   position: absolute;
   left: 50%;
-  bottom: 13%;
+  bottom: 18%;
   width: min(86vw, 82em);
   height: 9em;
   translate: -50% 0;
@@ -218,7 +218,7 @@ button.pill:active {
   pointer-events: auto;
   position: absolute;
   left: 50%;
-  bottom: calc(13% + 3.4em);
+  bottom: calc(18% + 3.4em);
   cursor: pointer;
   margin-left: calc(var(--card-w) / -2);
   transform-origin: 50% 100%;
@@ -242,11 +242,11 @@ button.pill:active {
 
 /* ---- Folder card (used in the carousel and on the folder screen) ---- */
 .fcard {
-  --card-w: 20.5em;
+  --card-w: 22em;
   --c: var(--active);
   --focus: 0;
   width: var(--card-w);
-  height: calc(var(--card-w) * 1.12);
+  height: calc(var(--card-w) * 1.02);
   container-type: inline-size;
   color: var(--card-text);
 }
@@ -255,43 +255,10 @@ button.pill:active {
   inset: 0;
   -webkit-box-reflect: below 0.6em linear-gradient(transparent 84%, rgb(255 255 255 / var(--reflect)));
 }
-.fcard-back,
 .fcard-front {
   position: absolute;
+  inset: 0;
   border-radius: 7cqi;
-}
-.fcard-back {
-  inset: 3% 2% 4% 2%;
-  border-top-left-radius: 0;
-  background: linear-gradient(180deg, rgb(var(--c) / 0.55), rgb(var(--c) / 0.18));
-  border: 1px solid rgb(var(--c) / 0.6);
-  border-top-color: transparent;
-}
-.fcard-back::before {
-  /* The folder tab sits on top of the back panel and shares its color, so they read as one shape. */
-  content: '';
-  position: absolute;
-  left: -1px;
-  bottom: calc(100% - 1px);
-  width: 44%;
-  height: 8cqi;
-  border-radius: 5cqi 5cqi 0 0;
-  background: rgb(var(--c) / 0.55);
-  clip-path: polygon(0 0, 76% 0, 100% 100%, 0 100%);
-}
-.fcard-back::after {
-  /* The top edge of the back panel, to the right of the tab */
-  content: '';
-  position: absolute;
-  left: calc(44% - 1px);
-  right: 0;
-  top: 0;
-  height: 7cqi;
-  border-top: 1px solid rgb(var(--c) / 0.6);
-  border-top-right-radius: 7cqi;
-}
-.fcard-front {
-  inset: 11% 0 0 0;
   overflow: hidden;
   background:
     linear-gradient(165deg, rgb(var(--c) / 0.42) 0%, rgb(var(--c) / 0.1) 48%, rgb(var(--c) / 0.24) 100%),
@@ -390,6 +357,46 @@ button.pill:active {
   left: 2.6em;
   z-index: 10;
   font-size: 1.15em;
+}
+.fs-btn {
+  position: absolute;
+  top: 1.9em;
+  right: 2.6em;
+  z-index: 10;
+  font-size: 1.15em;
+}
+/* Gear in the top-right corner of the home screen. It opens the settings. */
+.settings-btn {
+  position: absolute;
+  top: 1.9em;
+  right: 2.6em;
+  z-index: 10;
+  font-size: 1.15em;
+  width: 2.6em;
+  height: 2.6em;
+  padding: 0;
+  justify-content: center;
+}
+.settings-btn .icon {
+  width: 1.3em;
+  height: 1.3em;
+}
+.kiosk:has(#home[hidden]) .settings-btn {
+  display: none;
+}
+/* On the home screen, Full screen sits to the left of the gear. */
+.kiosk:has(#home:not([hidden])) .fs-btn {
+  right: calc(2.6em + 2.6em + 0.8em);
+}
+/* Holding the logo or title opens the settings. Show that the hold is counting. */
+.brand-icon,
+.brand-title {
+  transition: opacity 3s linear, transform 3s linear;
+}
+.brand.is-holding .brand-icon,
+.brand.is-holding .brand-title {
+  opacity: 0.35;
+  transform: scale(0.94);
 }
 .folder-bar {
   display: flex;
@@ -664,27 +671,57 @@ button.pill:active {
   object-fit: contain;
   display: block;
 }
-.player video::cue {
-  font-family: 'Mona Sans', system-ui, sans-serif;
-  font-size: 0.9em;
+/* Captions, drawn by the kiosk. They sit above the controls while the controls show. */
+.captions {
+  position: absolute;
+  left: 50%;
+  bottom: 3em;
+  width: min(86%, 70em);
+  translate: -50% 0;
+  text-align: center;
+  pointer-events: none;
+  transition: bottom 0.35s ease;
+  font-size: var(--cc-size, 1.7em);
+  line-height: 1.4;
+  font-weight: 500;
   color: #fff;
-  background: rgb(0 0 0 / 0.7);
 }
-/* Lift the captions above the controls while the controls show. */
-.player video::-webkit-media-text-track-container {
-  transition: transform 0.4s ease;
+.player:not(.controls-hidden) .captions {
+  bottom: calc(8.5em / var(--cc-scale, 1.7));
 }
-.player:not(.controls-hidden) video::-webkit-media-text-track-container {
-  transform: translateY(-7em);
+.captions span {
+  padding: 0.08em 0.45em;
+  border-radius: 0.25em;
+  background: rgb(0 0 0 / 0.78);
+  white-space: pre-line;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.player[data-cc-size='small'] {
+  --cc-size: 1.3em;
+  --cc-scale: 1.3;
+}
+.player[data-cc-size='medium'] {
+  --cc-size: 1.7em;
+  --cc-scale: 1.7;
+}
+.player[data-cc-size='large'] {
+  --cc-size: 2.2em;
+  --cc-scale: 2.2;
+}
+.player[data-cc-size='x-large'] {
+  --cc-size: 2.8em;
+  --cc-scale: 2.8;
+}
+.player {
+  --pill-bg: rgb(20 24 40 / 0.6);
+  --pill-border: rgb(255 255 255 / 0.3);
 }
 .player-ui {
   position: absolute;
   inset: 0;
-  transition: opacity 0.4s ease;
   color: #fff;
   --text: #fff;
-  --pill-bg: rgb(20 24 40 / 0.6);
-  --pill-border: rgb(255 255 255 / 0.3);
   /* Taps on empty areas go through to the video; only the controls take them. */
   pointer-events: none;
 }
@@ -692,32 +729,49 @@ button.pill:active {
 .player-ui .seek {
   pointer-events: auto;
 }
-.player.controls-hidden .player-ui {
+/* The controls fade out during playback. The Back button stays. */
+.player-bottom,
+.big-play {
+  transition: opacity 0.4s ease;
+}
+.player.controls-hidden .player-bottom {
   opacity: 0;
 }
-.player.controls-hidden .player-ui button,
-.player.controls-hidden .player-ui .seek {
+.player.controls-hidden .player-bottom button,
+.player.controls-hidden .player-bottom .seek {
   pointer-events: none;
 }
-.player-top {
+/* Small and in the top-left corner. */
+.player-back {
   position: absolute;
-  inset: 0 0 auto 0;
-  display: flex;
-  align-items: center;
-  gap: 1.6em;
-  padding: 1.8em 2.4em 4em;
-  background: linear-gradient(rgb(0 0 0 / 0.7), transparent);
+  top: 0.8em;
+  left: 0.8em;
+  z-index: 2;
+  padding: 0.45em 1em;
+  gap: 0.5em;
+  font-size: 0.95em;
+  --text: #fff;
+  color: #fff;
+  background: rgb(12 14 22 / 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: padding 0.3s ease, gap 0.3s ease;
 }
-.player-top .pill {
-  font-size: 1.15em;
-  flex: none;
-}
-.player-title {
-  font-size: 1.4em;
-  font-weight: 600;
-  white-space: nowrap;
+/* While a video plays, only the arrow shows. When it pauses, "Back" slides in. */
+.back-label {
+  display: inline-block;
+  max-width: 4em;
   overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: max-width 0.3s ease, opacity 0.3s ease;
+}
+.player.is-playing .player-back {
+  padding: 0.45em 0.75em;
+  gap: 0;
+}
+.player.is-playing .back-label {
+  max-width: 0;
+  opacity: 0;
 }
 .player-bottom {
   position: absolute;

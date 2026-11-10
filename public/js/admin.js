@@ -1,6 +1,7 @@
 import { $, $$, h, icon, cssTriples, setTheme } from './dom.js';
 
 const IDLE_LABELS = { 0: 'Never', 60: 'After 1 minute', 120: 'After 2 minutes', 300: 'After 5 minutes', 600: 'After 10 minutes' };
+const CAPTION_LABELS = { small: 'Small', medium: 'Medium', large: 'Large', 'x-large': 'Extra large' };
 
 export function createAdmin({ onLaunch }) {
   const root = $('#admin');
@@ -46,8 +47,8 @@ export function createAdmin({ onLaunch }) {
     setTheme(settings.theme);
 
     $$('.segmented button', root).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.type === type)));
-    $('#path-label').textContent = type === 'json' ? 'Catalog file' : 'Videos folder';
-    pathInput.placeholder = type === 'json' ? '/path/to/catalog.json' : '/path/to/videos';
+    $('#path-label').textContent = type === 'json' ? 'Catalog file' : 'Videos folder (the videos folder or a folder inside it)';
+    pathInput.placeholder = type === 'json' ? '/path/to/catalog.json' : state.videosDir;
     if (document.activeElement !== pathInput) pathInput.value = settings.source.path;
     $('#folder-fields').hidden = type !== 'folder';
     if (document.activeElement !== titleInput) titleInput.value = settings.source.title;
@@ -72,6 +73,9 @@ export function createAdmin({ onLaunch }) {
     idle.value = String(settings.idleSeconds);
     $('#attract').setAttribute('aria-checked', String(settings.attractMode));
     $('#captions').setAttribute('aria-checked', String(settings.captions));
+    const ccSize = $('#caption-size');
+    if (!ccSize.options.length) for (const s of state.captionSizes) ccSize.append(h('option', { value: s }, CAPTION_LABELS[s] ?? s));
+    ccSize.value = settings.captionSize;
 
     launchBtn.disabled = validation.errors.length > 0;
   }
@@ -147,7 +151,8 @@ export function createAdmin({ onLaunch }) {
     try {
       const data = await api('GET', `/api/browse?files=${type === 'json' ? 'json' : ''}&dir=${encodeURIComponent(dir ?? '')}`);
       browseDir = data.dir;
-      $('#browser-path').textContent = data.dir;
+      // Folder mode stays inside the videos folder, so show paths from there.
+      $('#browser-path').textContent = data.root ? `videos${data.dir.slice(data.root.length)}` : data.dir;
       $('#browser-shortcuts').replaceChildren(
         ...data.shortcuts.map((s) => h('button', { class: 'chip', type: 'button', onclick: () => browse(s.path) }, h('span', {}, s.name))),
       );
@@ -166,7 +171,8 @@ export function createAdmin({ onLaunch }) {
       $('#browser-list').replaceChildren(...items);
       $('#browser-list').scrollTop = 0;
     } catch (err) {
-      toast(err.message);
+      // A toast would be hidden behind the dialog, so show the error in the list.
+      $('#browser-list').replaceChildren(h('li', { class: 'empty' }, err.message));
     }
   }
 
@@ -190,7 +196,7 @@ export function createAdmin({ onLaunch }) {
       const type = b.dataset.type;
       if (type === state.settings.source.type) return;
       const recent = state.settings.recent.find((r) => r.type === type);
-      save({ source: { type, path: recent?.path ?? '' } });
+      save({ source: { type, path: recent?.path ?? (type === 'folder' ? state.videosDir : '') } });
     }),
   );
   const commitPath = () => pathInput.value.trim() !== state.settings.source.path && save({ source: { path: pathInput.value.trim() } });
@@ -204,6 +210,7 @@ export function createAdmin({ onLaunch }) {
   $('#idle').addEventListener('change', (e) => save({ idleSeconds: Number(e.target.value) }));
   $('#attract').addEventListener('click', () => save({ attractMode: !state.settings.attractMode }));
   $('#captions').addEventListener('click', () => save({ captions: !state.settings.captions }));
+  $('#caption-size').addEventListener('change', (e) => save({ captionSize: e.target.value }));
   launchBtn.addEventListener('click', async () => {
     launchBtn.disabled = true;
     root.hidden = true;

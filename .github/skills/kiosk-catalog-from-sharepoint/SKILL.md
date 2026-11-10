@@ -29,7 +29,7 @@ The kiosk shows only these four folders:
 | SharePoint folder | Icon (Octicon) |
 |---|---|
 | `GitHub Advanced Security - Found means fixed` | `shield-check` |
-| `GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent` | `sparkles-fill` |
+| `GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent` | `agent` |
 | `GitHub Copilot - Desktop App, CLI, SDK` | `device-desktop` |
 | `GitHub Enterprise - Scale AI-powered development with confidence` | `stack` |
 

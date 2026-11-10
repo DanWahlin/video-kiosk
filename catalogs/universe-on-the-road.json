@@ -1,7 +1,7 @@
 {
   "$schema": "../schema/kiosk-catalog.schema.json",
   "title": "Universe on the Road",
-  "subtitle": "Self-Serve Videos",
+  "subtitle": "Videos",
   "icon": "assets/GitHub_Invertocat_White.svg",
   "iconLight": "assets/GitHub_Invertocat_Black.svg",
   "folders": [
@@ -23,7 +23,7 @@
           "captions": "../videos/GitHub Advanced Security - Found means fixed/github-ai-scan.vtt"
         },
         {
-          "title": "Quiz: Cloud agent and autofix are available in the repo. What does assigning a code scanning alert to Copilot do?",
+          "title": "Question: Cloud agent and autofix are available in the repo. What does assigning a code scanning alert to Copilot do?",
           "description": "An animated multiple-choice quiz about GitHub Advanced Security. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Agentic autofix attempts and validates a fix, but validation is best-effort and human review still matters.",
           "path": "../videos/GitHub Advanced Security - Found means fixed/github-b-question-agentic-autofix-code-scanning.mp4"
         },
@@ -34,7 +34,7 @@
           "captions": "../videos/GitHub Advanced Security - Found means fixed/github-code-quality.vtt"
         },
         {
-          "title": "Quiz: You're using GitHub Code Quality. Which statements about its findings are true?",
+          "title": "Question: You're using GitHub Code Quality. Which statements about its findings are true?",
           "description": "An animated multiple-choice quiz about GitHub Advanced Security. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. PR findings are rules-based; AI analysis runs after merge. Quality focuses on reliability and maintainability.",
           "path": "../videos/GitHub Advanced Security - Found means fixed/github-code-quality-quiz.mp4"
         },
@@ -66,7 +66,7 @@
           "captions": "../videos/GitHub Advanced Security - Found means fixed/github-package-firewall.vtt"
         },
         {
-          "title": "GitHub Package Firewall Quiz",
+          "title": "Question: GitHub Package Firewall",
           "description": "",
           "path": "../videos/GitHub Advanced Security - Found means fixed/github-package-firewall-quiz.mp4"
         },
@@ -76,7 +76,7 @@
           "path": "../videos/GitHub Advanced Security - Found means fixed/github-pr-security-codeql-aiscan.mp4"
         },
         {
-          "title": "Quiz: Which statements about GitHub AI Scan on pull requests are true?",
+          "title": "Question: Which statements about GitHub AI Scan on pull requests are true?",
           "description": "An animated multiple-choice quiz about GitHub Advanced Security. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. AI Scan complements CodeQL with advisory findings on pull requests.",
           "path": "../videos/GitHub Advanced Security - Found means fixed/github-q-question-ai-scan-pull-requests.mp4"
         },
@@ -87,7 +87,7 @@
           "captions": "../videos/GitHub Advanced Security - Found means fixed/github-secret-detection-model.vtt"
         },
         {
-          "title": "Quiz: Your team wants designated people to approve secret-block bypass requests. Which control fits?",
+          "title": "Question: Your team wants designated people to approve secret-block bypass requests. Which control fits?",
           "description": "An animated multiple-choice quiz about GitHub Advanced Security. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Delegated bypass controls who can bypass secret blocks and review other contributors' bypass requests.",
           "path": "../videos/GitHub Advanced Security - Found means fixed/question-secret-push-protection.mp4"
         }
@@ -96,7 +96,7 @@
     {
       "title": "GitHub Copilot",
       "description": "Automations, Metrics, Code Review, Cloud Agent",
-      "icon": "sparkles-fill",
+      "icon": "agent",
       "videos": [
         {
           "title": "Cautious Issue Triage with GitHub Agentic Workflows",
@@ -110,7 +110,7 @@
           "captions": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/agent-automation-controls.vtt"
         },
         {
-          "title": "Quiz: On GitHub.com, must Copilot cloud agent open a pull request before it can work on code?",
+          "title": "Question: On GitHub.com, must Copilot cloud agent open a pull request before it can work on code?",
           "description": "An animated multiple-choice quiz about GitHub Copilot: Automation, Metrics, Cloud Agent. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. On GitHub.com, Copilot can work on a branch first. Other integrations can require a pull request.",
           "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/a-question-cloud-agent-branch-first.mp4"
         },
@@ -126,7 +126,7 @@
           "captions": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-continuity-automations-and-security.vtt"
         },
         {
-          "title": "Quiz: A cloud Copilot automation is private to its creator. Who can see the sessions it starts?",
+          "title": "Question: A cloud Copilot automation is private to its creator. Who can see the sessions it starts?",
           "description": "An animated multiple-choice quiz about GitHub Copilot: Automation, Metrics, Cloud Agent. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. The definition is private, but repository collaborators can see session prompts and logs.",
           "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-ma-question-copilot-automation-session-visibility.mp4"
         },
@@ -143,7 +143,7 @@
           "captions": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-metrics-impact-dashboard.vtt"
         },
         {
-          "title": "Quiz: What determines adoption depth in Copilot's impact dashboard?",
+          "title": "Question: What determines adoption depth in Copilot's impact dashboard?",
           "description": "An animated multiple-choice quiz about GitHub Copilot. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Cohorts reflect the capabilities used with qualifying engagement, not just activity volume or PR output.",
           "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/copilot-n-question-copilot-impact-adoption-depth.mp4"
         },
@@ -160,7 +160,7 @@
           "captions": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/finops-for-github-copilot.vtt"
         },
         {
-          "title": "Quiz: What does the Copilot impact dashboard's adoption multiplier compare?",
+          "title": "Question: What does the Copilot impact dashboard's adoption multiplier compare?",
           "description": "An animated multiple-choice quiz about GitHub Copilot: Automation, Metrics, Cloud Agent. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. It compares engaged and passive users, not the same users before and after adoption.",
           "path": "../videos/GitHub Copilot - Automations, Metrics, Code Review, Cloud Agent/question-metrics-impact-interpretation.mp4"
         }
@@ -172,7 +172,7 @@
       "icon": "device-desktop",
       "videos": [
         {
-          "title": "Quiz: You select a local Ollama model in GitHub Copilot CLI. Does that enable offline mode or disable telemetry?",
+          "title": "Question: You select a local Ollama model in GitHub Copilot CLI. Does that enable offline mode or disable telemetry?",
           "description": "An animated multiple-choice quiz about GitHub Copilot: App, CLI, SDK. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Selecting a local model does not enable offline mode or disable GitHub telemetry.",
           "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/a-question-cli-local-model-network-behavior.mp4"
         },
@@ -209,7 +209,7 @@
           "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-automations.mp4"
         },
         {
-          "title": "Quiz: You enable local sandboxing in GitHub Copilot CLI. Does that also enable it in the Copilot app?",
+          "title": "Question: You enable local sandboxing in GitHub Copilot CLI. Does that also enable it in the Copilot app?",
           "description": "An animated multiple-choice quiz about GitHub Copilot: App, CLI, SDK. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Enabling local sandboxing in the CLI does not change the Copilot app's sandbox settings.",
           "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/copilot-b-question-copilot-app-local-sandboxing-default.mp4"
         },
@@ -271,7 +271,7 @@
           "captions": "../videos/GitHub Copilot - Desktop App, CLI, SDK/github-copilot-fusion.vtt"
         },
         {
-          "title": "Quiz: In Copilot SDK, which custom-tool design passes a product ID to your inventory API code?",
+          "title": "Question: In Copilot SDK, which custom-tool design passes a product ID to your inventory API code?",
           "description": "An animated multiple-choice quiz about GitHub Copilot: App, CLI, SDK. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. The tool describes its inputs; its handler executes your code and returns the result to the agent.",
           "path": "../videos/GitHub Copilot - Desktop App, CLI, SDK/z-question-copilot-sdk-custom-tools.mp4"
         }
@@ -301,7 +301,7 @@
           "captions": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/budgets-and-alerts.vtt"
         },
         {
-          "title": "Quiz: You disable Copilot cloud agent in enterprise AI Controls. What happens to third-party agents on GitHub.com?",
+          "title": "Question: You disable Copilot cloud agent in enterprise AI Controls. What happens to third-party agents on GitHub.com?",
           "description": "An animated multiple-choice quiz about GitHub Enterprise. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Copilot and third-party cloud agents have separate policies; configure each agent type independently.",
           "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/ca-question-enterprise-agent-policy-independence.mp4"
         },
@@ -312,7 +312,7 @@
           "captions": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/copilot-metrics-by-client.vtt"
         },
         {
-          "title": "Quiz: What can admins control with the fusionTier managed-settings key?",
+          "title": "Question: What can admins control with the fusionTier managed-settings key?",
           "description": "An animated multiple-choice quiz about GitHub Enterprise. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. fusionTier sets the Fusion effort level. A value locks it for users, and \"overridable\" lets enterprise teams change it.",
           "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/copilot-n-question-enterprise-fusion-tier.mp4"
         },
@@ -323,7 +323,7 @@
           "captions": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/cost-centers.vtt"
         },
         {
-          "title": "Quiz: What does agent session streaming give enterprise admins visibility into?",
+          "title": "Question: What does agent session streaming give enterprise admins visibility into?",
           "description": "An animated multiple-choice quiz about GitHub Enterprise. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Agent session streaming shows prompts, responses, and tool calls from Copilot clients across the enterprise.",
           "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/cp-question-enterprise-agent-session-streaming.mp4"
         },
@@ -340,7 +340,7 @@
           "captions": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/gh-stacked-prs.vtt"
         },
         {
-          "title": "Quiz: How can you configure the \"Default availability for released models\" policy at the enterprise level?",
+          "title": "Question: How can you configure the \"Default availability for released models\" policy at the enterprise level?",
           "description": "An animated multiple-choice quiz about GitHub Enterprise. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. The policy has three enterprise states. Pre-GA, open weight, and some other models are never affected.",
           "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/gh-t-question-enterprise-default-model-availability.mp4"
         },
@@ -356,7 +356,7 @@
           "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/issue-intents-v2.mp4"
         },
         {
-          "title": "Quiz: What does setting model to \"auto\" in managed settings do?",
+          "title": "Question: What does setting model to \"auto\" in managed settings do?",
           "description": "An animated multiple-choice quiz about GitHub Enterprise. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. New sessions select a model automatically, unless the user selects a different model for a conversation.",
           "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/question-enterprise-managed-settings-auto-model.mp4"
         },
@@ -372,7 +372,7 @@
           "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/shortcuts-ghcom.mp4"
         },
         {
-          "title": "Quiz: Which Copilot clients does GitHub support with managed settings?",
+          "title": "Question: Which Copilot clients does GitHub support with managed settings?",
           "description": "An animated multiple-choice quiz about GitHub Enterprise. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Every one of these clients supports managed settings, but the keys that apply are different for each client.",
           "path": "../videos/GitHub Enterprise - Scale AI-powered development with confidence/z-question-enterprise-managed-settings-clients.mp4"
         }

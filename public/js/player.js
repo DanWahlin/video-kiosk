@@ -3,7 +3,6 @@ import { $, formatTime, iconSvg } from './dom.js';
 // Full-screen video overlay with large, touch-friendly controls.
 export function createPlayer(root, { onClose, onCaptions }) {
   const video = $('video', root);
-  const title = $('.player-title', root);
   const toggle = $('.toggle', root);
   const bigPlay = $('.big-play', root);
   const seek = $('.seek', root);
@@ -12,12 +11,15 @@ export function createPlayer(root, { onClose, onCaptions }) {
   const now = $('.time-now', root);
   const total = $('.time-total', root);
   const cc = $('.cc', root);
+  const ccBox = $('.captions', root);
   const error = $('.player-error', root);
   let hideTimer = 0;
   let errorTimer = 0;
   let raf = 0;
   let seeking = false;
   let open = false;
+  let trackEl = null;
+  let captionsOn = true;
 
   const isPlaying = () => !video.paused && !video.ended;
 
@@ -29,6 +31,7 @@ export function createPlayer(root, { onClose, onCaptions }) {
 
   function syncButtons() {
     const playing = isPlaying();
+    root.classList.toggle('is-playing', playing);
     $('.icon', toggle).innerHTML = playing ? pauseSvg : iconSvg('play');
     toggle.setAttribute('aria-label', playing ? 'Pause' : 'Play');
     bigPlay.hidden = playing || !open;
@@ -55,30 +58,54 @@ export function createPlayer(root, { onClose, onCaptions }) {
     showControls();
   }
 
+  // The kiosk draws the captions itself (the track stays "hidden"), so it controls their
+  // place above the controls, their size, and when they clear.
+  function renderCues() {
+    ccBox.replaceChildren();
+    const cues = trackEl?.track.activeCues;
+    if (!captionsOn || !cues) return;
+    for (const cue of cues) {
+      const line = document.createElement('span');
+      line.append(cue.getCueAsHTML());
+      const row = document.createElement('div');
+      row.append(line);
+      ccBox.append(row);
+    }
+  }
+
   function setCaptions(on) {
-    const track = video.textTracks[0];
-    if (track) track.mode = on ? 'showing' : 'hidden';
+    captionsOn = on;
+    renderCues();
     cc.classList.toggle('is-off', !on);
     cc.setAttribute('aria-pressed', String(on));
     cc.setAttribute('aria-label', on ? 'Turn captions off' : 'Turn captions on');
     $('.cc-state', cc).textContent = on ? 'On' : 'Off';
   }
 
+  function removeTrack() {
+    trackEl?.remove();
+    trackEl = null;
+    ccBox.replaceChildren();
+  }
+
   function openVideo(v, { captions }) {
     open = true;
     clearTimeout(errorTimer);
     error.hidden = true;
-    title.textContent = v.title;
-    video.querySelectorAll('track').forEach((t) => t.remove());
+    // The video shows its own title, so the player names it only for screen readers.
+    video.setAttribute('aria-label', v.title);
+    removeTrack();
     cc.hidden = !v.captions;
     if (v.captions) {
-      const track = document.createElement('track');
-      Object.assign(track, { kind: 'captions', src: v.captions, srclang: 'en', label: 'English', default: captions });
-      video.append(track);
+      const el = Object.assign(document.createElement('track'), { kind: 'captions', src: v.captions, srclang: 'en', label: 'English' });
+      video.append(el);
+      el.track.mode = 'hidden';
+      el.track.addEventListener('cuechange', () => el === trackEl && renderCues());
+      trackEl = el;
     }
     video.src = v.src;
     root.hidden = false;
-    if (v.captions) setCaptions(captions);
+    setCaptions(captions);
     play();
     showControls();
     syncButtons();
@@ -92,6 +119,7 @@ export function createPlayer(root, { onClose, onCaptions }) {
     clearTimeout(hideTimer);
     clearTimeout(errorTimer);
     video.pause();
+    removeTrack();
     video.removeAttribute('src');
     video.load();
     root.hidden = true;
@@ -106,9 +134,8 @@ export function createPlayer(root, { onClose, onCaptions }) {
   bigPlay.addEventListener('click', togglePlay);
   $('.close', root).addEventListener('click', () => close('closed'));
   cc.addEventListener('click', () => {
-    const on = video.textTracks[0]?.mode !== 'showing';
-    setCaptions(on);
-    onCaptions?.(on);
+    setCaptions(!captionsOn);
+    onCaptions?.(captionsOn);
     showControls();
   });
   video.addEventListener('play', syncButtons);
