@@ -1,5 +1,8 @@
 import { $, formatTime, iconSvg } from './dom.js';
 
+const HIDE_CONTROLS_MS = 3000;
+const PAUSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
+
 // Full-screen video overlay with large, touch-friendly controls.
 export function createPlayer(root, { onClose, onCaptions }) {
   const video = $('video', root);
@@ -16,6 +19,7 @@ export function createPlayer(root, { onClose, onCaptions }) {
   let hideTimer = 0;
   let errorTimer = 0;
   let raf = 0;
+  let shown = { p: -1, now: '', total: '' }; // What the controls show, so draw() writes only changes
   let seeking = false;
   let open = false;
   let trackEl = null;
@@ -23,31 +27,47 @@ export function createPlayer(root, { onClose, onCaptions }) {
 
   const isPlaying = () => !video.paused && !video.ended;
 
+  const controlsShown = () => !root.classList.contains('controls-hidden');
+
   function showControls() {
     root.classList.remove('controls-hidden');
     clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => isPlaying() && !seeking && root.classList.add('controls-hidden'), 3000);
+    hideTimer = setTimeout(() => isPlaying() && !seeking && root.classList.add('controls-hidden'), HIDE_CONTROLS_MS);
+    startDrawing();
   }
 
   function syncButtons() {
     const playing = isPlaying();
     root.classList.toggle('is-playing', playing);
-    $('.icon', toggle).innerHTML = playing ? pauseSvg : iconSvg('play');
+    $('.icon', toggle).innerHTML = playing ? PAUSE_SVG : iconSvg('play');
     toggle.setAttribute('aria-label', playing ? 'Pause' : 'Play');
     bigPlay.hidden = playing || !open;
   }
-  const pauseSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
 
+  // Updates the seek bar and times. Writes to the page only when a value changed.
   function draw() {
     const d = video.duration;
     const t = video.currentTime;
     const p = d > 0 ? Math.min(1, t / d) : 0;
-    fill.style.width = `${p * 100}%`;
-    knob.style.left = `${p * 100}%`;
-    now.textContent = formatTime(t) || '0:00';
-    total.textContent = formatTime(d) || '';
-    seek.setAttribute('aria-valuenow', String(Math.round(p * 100)));
-    if (open) raf = requestAnimationFrame(draw);
+    if (Math.abs(p - shown.p) > 0.0002) {
+      shown.p = p;
+      fill.style.width = `${p * 100}%`;
+      knob.style.left = `${p * 100}%`;
+      seek.setAttribute('aria-valuenow', String(Math.round(p * 100)));
+    }
+    const nowText = formatTime(t) || '0:00';
+    const totalText = formatTime(d);
+    if (nowText !== shown.now) now.textContent = shown.now = nowText;
+    if (totalText !== shown.total) total.textContent = shown.total = totalText;
+  }
+
+  // Animates the seek bar only while the video plays and the controls show.
+  function frame() {
+    draw();
+    raf = open && isPlaying() && controlsShown() ? requestAnimationFrame(frame) : 0;
+  }
+  function startDrawing() {
+    if (!raf && open) raf = requestAnimationFrame(frame);
   }
 
   function play() {
@@ -105,17 +125,18 @@ export function createPlayer(root, { onClose, onCaptions }) {
     }
     video.src = v.src;
     root.hidden = false;
+    shown = { p: -1, now: '', total: '' };
     setCaptions(captions);
     play();
     showControls();
     syncButtons();
-    raf = requestAnimationFrame(draw);
   }
 
   function close(reason = 'closed') {
     if (!open) return;
     open = false;
     cancelAnimationFrame(raf);
+    raf = 0;
     clearTimeout(hideTimer);
     clearTimeout(errorTimer);
     video.pause();
@@ -138,7 +159,12 @@ export function createPlayer(root, { onClose, onCaptions }) {
     onCaptions?.(captionsOn);
     showControls();
   });
-  video.addEventListener('play', syncButtons);
+  video.addEventListener('play', () => {
+    syncButtons();
+    startDrawing();
+  });
+  // Seeking or loading while paused still updates the bar.
+  for (const type of ['seeked', 'durationchange', 'loadedmetadata']) video.addEventListener(type, draw);
   video.addEventListener('pause', () => {
     syncButtons();
     showControls();
@@ -174,6 +200,7 @@ export function createPlayer(root, { onClose, onCaptions }) {
 
   return {
     open: openVideo,
+    setCaptionSize: (size) => (root.dataset.ccSize = size),
     close,
     togglePlay,
     get isOpen() {

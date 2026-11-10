@@ -29,7 +29,7 @@ export function createKiosk({ onExit }) {
   let idleResetDone = false;
   let lastAttract = 0;
   let timer = 0;
-  let running = false;
+  let listeners = null; // AbortController for the page-wide listeners while the kiosk runs
 
   const carousel = new Carousel($('.stage', home), $('.carousel', home), {
     onOpen: (i) => openFolder(i),
@@ -48,7 +48,7 @@ export function createKiosk({ onExit }) {
     if (!res.ok) throw new Error(data.error || 'The catalog did not load.');
     catalog = data;
     applyTheme(catalog.settings.theme);
-    $('#player').dataset.ccSize = catalog.settings.captionSize;
+    player.setCaptionSize(catalog.settings.captionSize);
     const lightTheme = catalog.settings.theme.endsWith('light');
     paintIcon($('.brand-icon', root), lightTheme && catalog.iconLight ? catalog.iconLight : catalog.icon);
     $('.brand-title', root).textContent = catalog.title;
@@ -58,7 +58,7 @@ export function createKiosk({ onExit }) {
     document.title = catalog.title;
 
     carousel.setCards(
-      catalog.folders.map((f, i) => {
+      catalog.folders.map((f) => {
         const card = folderCard(f);
         card.setAttribute('role', 'option');
         card.setAttribute('aria-label', `${f.title}. ${f.description}`);
@@ -127,7 +127,6 @@ export function createKiosk({ onExit }) {
 
   function renderFolder(i) {
     folderIndex = i;
-    currentRow = 0;
     const folder = catalog.folders[i];
     const color = carousel.colorFor(i).join(' ');
 
@@ -172,7 +171,7 @@ export function createKiosk({ onExit }) {
     }
     thumb.append(h('span', { class: 'play' }, icon('play')));
     if (v.duration) thumb.append(h('span', { class: 'dur' }, formatTime(v.duration)));
-    if (watched.has(`${folderIndex}:${vi}`)) thumb.append(h('span', { class: 'watched', html: iconSvg('check-circle-fill') }));
+    if (watched.has(`${folderIndex}:${vi}`)) thumb.append(watchedBadge());
     return h(
       'li',
       {},
@@ -184,6 +183,8 @@ export function createKiosk({ onExit }) {
       ),
     );
   }
+
+  const watchedBadge = () => h('span', { class: 'watched', html: iconSvg('check-circle-fill') });
 
   // Curved light lines from the folder card to the list.
   function drawLinks(color) {
@@ -218,7 +219,19 @@ export function createKiosk({ onExit }) {
     listDots.style.visibility = pages > 1 ? 'visible' : 'hidden';
     $$('button', listDots).forEach((d, k) => d.classList.toggle('is-active', k === page));
   }
-  listWrap.addEventListener('scroll', () => requestAnimationFrame(updateListDots), { passive: true });
+  let dotsQueued = false;
+  listWrap.addEventListener(
+    'scroll',
+    () => {
+      if (dotsQueued) return;
+      dotsQueued = true;
+      requestAnimationFrame(() => {
+        dotsQueued = false;
+        updateListDots();
+      });
+    },
+    { passive: true },
+  );
   new ResizeObserver(() => !folderScreen.hidden && updateListDots()).observe(listWrap);
 
   // ---- Playback ----
@@ -231,12 +244,11 @@ export function createKiosk({ onExit }) {
     if (reason === 'home' || reason === 'exit') return;
     noteInput(); // Watching counts as activity, so the idle timer starts again from here.
     if (folderIndex < 0) return;
+    const row = $$('.vrow', list)[currentRow];
     if (reason === 'ended') {
       watched.add(`${folderIndex}:${currentRow}`);
-      const row = $$('.vrow', list)[currentRow];
-      if (row && !$('.watched', row)) $('.thumb', row).append(h('span', { class: 'watched', html: iconSvg('check-circle-fill') }));
+      if (row && !$('.watched', row)) $('.thumb', row).append(watchedBadge());
     }
-    const row = $$('.vrow', list)[currentRow];
     row?.scrollIntoView({ block: 'nearest' });
     row?.focus({ preventScroll: true });
   }
@@ -323,7 +335,6 @@ export function createKiosk({ onExit }) {
       if (document.fullscreenElement) await document.exitFullscreen().catch(() => {});
       throw err;
     }
-    running = true;
     folderScreen.hidden = true;
     back.hidden = true;
     home.hidden = false;
@@ -335,30 +346,22 @@ export function createKiosk({ onExit }) {
     idleResetDone = false;
     timer = setInterval(idleTick, 500);
     syncFullscreenButton();
-    addEventListener('keydown', onKey);
-    addEventListener('pointerdown', noteInput, true);
-    addEventListener('pointermove', noteInput, true);
-    addEventListener('wheel', noteInput, true);
-    addEventListener('contextmenu', preventMenu);
-    addEventListener('resize', syncFullscreenButton);
-    document.addEventListener('fullscreenchange', syncFullscreenButton);
+    listeners = new AbortController();
+    const { signal } = listeners;
+    addEventListener('keydown', onKey, { signal });
+    for (const type of ['pointerdown', 'pointermove', 'wheel']) addEventListener(type, noteInput, { capture: true, passive: true, signal });
+    addEventListener('contextmenu', (e) => e.preventDefault(), { signal });
+    addEventListener('resize', syncFullscreenButton, { signal });
+    document.addEventListener('fullscreenchange', syncFullscreenButton, { signal });
   }
 
-  const preventMenu = (e) => e.preventDefault();
-
   function exit() {
-    if (!running) return;
-    running = false;
+    if (!listeners) return;
+    listeners.abort();
+    listeners = null;
     endHold();
     if (player.isOpen) player.close('exit');
     clearInterval(timer);
-    removeEventListener('keydown', onKey);
-    removeEventListener('pointerdown', noteInput, true);
-    removeEventListener('pointermove', noteInput, true);
-    removeEventListener('wheel', noteInput, true);
-    removeEventListener('contextmenu', preventMenu);
-    removeEventListener('resize', syncFullscreenButton);
-    document.removeEventListener('fullscreenchange', syncFullscreenButton);
     root.hidden = true;
     root.classList.remove('hide-cursor');
     watched = new Set();

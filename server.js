@@ -15,14 +15,15 @@ const HOST = process.env.HOST || '127.0.0.1';
 const CATALOG_DIR = path.join(ROOT, 'catalogs');
 // Folder mode can use only this folder and the folders inside it.
 const VIDEOS_DIR = path.join(ROOT, 'videos');
-const UI_ICONS = ['arrow-left', 'check', 'check-circle-fill', 'chevron-left', 'chevron-right', 'file', 'file-directory', 'home', 'play', 'screen-full', 'video', 'x', 'alert', 'sync', 'download', 'comment', 'gear'];
+const UI_ICONS = ['arrow-left', 'check-circle-fill', 'chevron-left', 'chevron-right', 'file', 'file-directory', 'home', 'play', 'screen-full', 'video', 'alert', 'sync', 'download', 'gear'];
 
 const settingsStore = createSettingsStore(path.join(ROOT, 'data', 'settings.json'));
 const media = createMediaTools(path.join(ROOT, 'data', 'cache'));
 
 // ---- Catalog source ----
+const fail = (message) => ({ errors: [message], warnings: [], summary: null });
 let active = null; // { raw, runtime, ready, version }
-let lastResult = { errors: ['Pick a JSON file or a folder.'], warnings: [], summary: null };
+let lastResult = fail('Pick a JSON file or a folder.');
 
 const isDir = (p) => {
   try {
@@ -42,18 +43,18 @@ function insideVideos(dir) {
 }
 
 function loadSource(source) {
-  if (!source?.path && source?.type !== 'folder') return { errors: ['Pick a JSON file or a folder.'], warnings: [], summary: null };
+  if (!source?.path && source?.type !== 'folder') return fail('Pick a JSON file or a folder.');
   if (source.type === 'folder') {
     // An empty folder path means the videos folder itself.
     const dir = source.path ? resolvePath(source.path, VIDEOS_DIR) : VIDEOS_DIR;
-    if (!isDir(dir)) return { errors: [`Folder not found: ${dir}`], warnings: [], summary: null };
-    if (!insideVideos(dir)) return { errors: [`Pick a folder inside ${VIDEOS_DIR}`], warnings: [], summary: null };
+    if (!isDir(dir)) return fail(`Folder not found: ${dir}`);
+    if (!insideVideos(dir)) return fail(`Pick a folder inside ${VIDEOS_DIR}`);
     const catalog = scanFolder(dir, source);
-    if (!catalog.folders.length) return { errors: ['No video files were found in this folder.'], warnings: [], summary: null };
+    if (!catalog.folders.length) return fail('No video files were found in this folder.');
     return { catalog, baseDir: dir, ...validateCatalog(catalog, { baseDir: dir }) };
   }
   const read = readCatalogFile(resolvePath(source.path, os.homedir()));
-  if (read.error) return { errors: [read.error], warnings: [], summary: null };
+  if (read.error) return fail(read.error);
   return { catalog: read.catalog, baseDir: read.baseDir, ...validateCatalog(read.catalog, { baseDir: read.baseDir }) };
 }
 
@@ -63,7 +64,7 @@ function activate() {
     result = loadSource(settingsStore.get().source);
   } catch (err) {
     // A bad saved source must never stop the server: the settings page has to open to fix it.
-    result = { errors: [`Cannot read the source: ${err.code ?? err.message}`], warnings: [], summary: null };
+    result = fail(`Cannot read the source: ${err.code ?? err.message}`);
   }
   lastResult = { errors: result.errors, warnings: result.warnings, summary: result.summary };
   if (result.errors.length) {
@@ -191,9 +192,14 @@ app.get('/api/catalog/export', adminOnly, (_req, res) => {
 
 app.get('/api/catalog', async (_req, res) => {
   if (!active) return res.status(409).json({ error: 'No catalog is loaded. Open the settings page on the kiosk computer.' });
-  await Promise.race([active.ready, new Promise((r) => setTimeout(r, 8000))]);
+  // Wait for video lengths, but never more than a few seconds.
+  let timer;
+  await Promise.race([active.ready, new Promise((r) => (timer = setTimeout(r, 8000)))]);
+  clearTimeout(timer);
   const { runtime, version } = active;
   const s = settingsStore.get();
+  // A URL plays from where it is; a local file goes through the /media routes.
+  const mediaUrl = (file, route) => (isUrl(file) ? file : `${route}?v=${version}`);
   res.json({
     version,
     settings: { theme: s.theme, idleSeconds: s.idleSeconds, attractMode: s.attractMode, captions: s.captions, captionSize: s.captionSize },
@@ -211,9 +217,10 @@ app.get('/api/catalog', async (_req, res) => {
           title: v.title,
           description: v.description,
           duration: v.duration,
-          src: isUrl(v.src) ? v.src : `${base}/video?v=${version}`,
-          captions: v.captions ? (isUrl(v.captions) ? v.captions : `${base}/captions?v=${version}`) : null,
-          thumbnail: v.thumbnail && isUrl(v.thumbnail) ? v.thumbnail : media.available.ffmpeg || v.thumbnail ? `${base}/thumb?v=${version}` : null,
+          src: mediaUrl(v.src, `${base}/video`),
+          captions: v.captions ? mediaUrl(v.captions, `${base}/captions`) : null,
+          // Without a thumbnail file, the server makes one only when ffmpeg is installed.
+          thumbnail: v.thumbnail || media.available.ffmpeg ? mediaUrl(v.thumbnail ?? '', `${base}/thumb`) : null,
         };
       }),
     })),

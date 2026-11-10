@@ -20,7 +20,9 @@ function startFromHash() {
     admin.show();
   });
 }
-addEventListener('hashchange', () => location.hash === '#kiosk' && ($('#kiosk').hidden ? startFromHash() : null));
+addEventListener('hashchange', () => {
+  if (location.hash === '#kiosk' && $('#kiosk').hidden) startFromHash();
+});
 
 if (location.hash === '#kiosk') startFromHash();
 else admin.show();

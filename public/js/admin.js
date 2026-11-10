@@ -25,14 +25,17 @@ export function createAdmin({ onLaunch }) {
     return data;
   }
 
-  async function save(patch) {
+  // Sends a settings request and shows the new state, or the error.
+  async function apply(request) {
     try {
-      state = await api('PUT', '/api/settings', patch);
+      state = await request;
       render();
     } catch (err) {
       toast(err.message);
     }
   }
+  const save = (patch) => apply(api('PUT', '/api/settings', patch));
+  const reload = () => apply(api('POST', '/api/reload'));
 
   function toast(msg) {
     const t = h('div', { class: 'toast', role: 'alert' }, msg);
@@ -134,15 +137,6 @@ export function createAdmin({ onLaunch }) {
       }
     }
     $$('.theme-tile', wrap).forEach((tile) => tile.setAttribute('aria-checked', String(tile.dataset.id === state.settings.theme)));
-  }
-
-  async function reload() {
-    try {
-      state = await api('POST', '/api/reload');
-      render();
-    } catch (err) {
-      toast(err.message);
-    }
   }
 
   // ---- Folder and file browser ----
