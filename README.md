@@ -14,7 +14,7 @@ the list at the same place.
 
 ## Quick start
 
-Requires Node.js 20 or later. Optional: [ffmpeg](https://ffmpeg.org/) for thumbnails and
+Requires Node.js 24 or later. Optional: [ffmpeg](https://ffmpeg.org/) for thumbnails and
 video lengths (`brew install ffmpeg` or `winget install ffmpeg`).
 
 1. Put your videos in `videos/`, one subfolder for each kiosk folder (the video files are
