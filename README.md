@@ -296,10 +296,31 @@ List the Azure catalogs in `static-site.json`. It also sets the site's default s
 settings page. After you replace files in Blob Storage, increase `mediaVersion`: the build
 adds it to the media URLs, so browsers do not use copies that they stored before.
 
+List the site's address in `siteUrl`. The live site check uses it when the deploy does not
+return an address.
+
 The GitHub Actions workflow
 ([`.github/workflows/deploy-static-web-app.yml`](.github/workflows/deploy-static-web-app.yml))
-runs `npm run build:static` and deploys `dist/` on every push to `main`. Save the Static Web
-App's deployment token as a repository secret, then push:
+runs on every pull request to `main` and on every push to `main` (a merged pull request is a
+push). It does these steps:
+
+1. `npm run check` validates the catalogs in `static-site.json` against the schema. Warnings
+   also stop the build. It sends a request to each video, captions, and thumbnail URL and
+   makes sure that each one returns the correct content type. It also makes sure that each
+   video accepts byte-range requests, so it can stream. Each Azure catalog must have the
+   same titles and descriptions as its source catalog (for example `ignite-11-2026.json`).
+   This way, the next `npm run azure:catalog` does not remove an edit.
+2. `npm run build:static` builds `dist/`.
+3. On a push to `main` only, the workflow deploys `dist/`. If the deploy fails, it waits
+   1 minute and tries one more time.
+4. `npm run check:live` waits until the live site serves the new files (up to 5 minutes).
+
+If a step fails, the workflow does not deploy. The live site keeps its last good copy, and
+GitHub sends an email about the failed run. On a pull request, the failed check shows before
+the merge. To edit a title or description, change it in both catalogs (for example
+`ignite-11-2026.json` and `ignite-azure-11-2026.json`), then run `npm run check`.
+
+Save the Static Web App's deployment token as a repository secret, then push:
 
 ```bash
 gh secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body "$(az staticwebapp secrets list \
@@ -339,7 +360,9 @@ tools/sharepoint-catalog.js  Builds a catalog from a SharePoint listing and the 
 tools/azure-catalog.js       Copies a catalog with Blob Storage URLs and thumbnails (npm run azure:catalog)
 tools/faststart.js           Copies MP4s with the index moved to the start (npm run azure:faststart)
 tools/build-static.js        Builds the static site in dist/ (npm run build:static)
-.github/workflows/           Deploys the static site to Azure on each push to main
+tools/check-catalogs.js      Checks the site's catalogs and media URLs before a deploy (npm run check)
+tools/check-live.js          Checks that the live site serves the new build (npm run check:live)
+.github/workflows/           Checks each pull request; deploys the static site to Azure on each push to main
 .github/skills/              Copilot skill: build a catalog from SharePoint (read only)
 docs/images/                 README screenshots
 videos/                      Your video files (not in Git)

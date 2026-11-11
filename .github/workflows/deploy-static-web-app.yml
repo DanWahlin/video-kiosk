@@ -1,23 +1,31 @@
-# Builds the static kiosk site (npm run build:static) and deploys it to
-# Azure Static Web Apps on every push to main. The videos are in Azure Blob
-# Storage, so the build does not need them.
+# Checks the catalogs and builds the static kiosk site for each pull request to main.
+# On each push to main (for example, a merged pull request), it also deploys dist/ to
+# Azure Static Web Apps and checks that the live site serves the new build.
+# If a check or the build fails, nothing is deployed and the live site keeps its last good copy.
+# The videos are in Azure Blob Storage, so the build does not need them.
 name: Deploy to Azure Static Web Apps
 
 on:
   push:
+    branches: [main]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# Pull requests: a new commit cancels the older check.
+# Deploys: one at a time, and a deploy is never stopped before it is complete.
 concurrency:
-  group: deploy-static-web-app
-  cancel-in-progress: true
+  group: ${{ github.event_name == 'pull_request' && format('check-{0}', github.ref) || 'deploy-static-web-app' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   deploy:
+    name: Check and deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
 
@@ -28,13 +36,38 @@ jobs:
 
       - run: npm ci
 
+      - name: Check the catalogs and media URLs
+        run: npm run check
+
       - name: Build the static site
         run: npm run build:static
 
       - name: Deploy dist/
+        id: deploy
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           action: upload
           app_location: dist
           skip_app_build: true
+
+      # A deploy can fail for a short time on the Azure side. Try one more time.
+      - name: Wait before the second try
+        if: steps.deploy.outcome == 'failure'
+        run: sleep 60
+
+      - name: Deploy dist/ (second try)
+        id: deploy-retry
+        if: steps.deploy.outcome == 'failure'
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: upload
+          app_location: dist
+          skip_app_build: true
+
+      - name: Check the live site
+        if: github.event_name != 'pull_request'
+        run: npm run check:live -- "${{ steps.deploy.outputs.static_web_app_url || steps.deploy-retry.outputs.static_web_app_url }}"

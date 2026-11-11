@@ -14,6 +14,8 @@
     "catalog:sharepoint": "node tools/sharepoint-catalog.js",
     "azure:catalog": "node tools/azure-catalog.js",
     "build:static": "node tools/build-static.js",
+    "check": "node tools/check-catalogs.js",
+    "check:live": "node tools/check-live.js",
     "azure:faststart": "node tools/faststart.js"
   },
   "dependencies": {
