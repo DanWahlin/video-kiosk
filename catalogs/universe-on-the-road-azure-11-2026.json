@@ -467,6 +467,14 @@
           "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/GitHub%20Enterprise%20-%20Scale%20AI-powered%20development%20with%20confidence/github-code-quality.jpg"
         },
         {
+          "title": "GitHub Enterprise: Scheduling Copilot Access Transitions",
+          "description": "A narrated explainer video. Show how an enterprise admin explores the Copilot access billing model, reviews its impact, prepares the settings, and schedules the transition for the first day of a billing cycle.",
+          "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/GitHub%20Enterprise%20-%20Scale%20AI-powered%20development%20with%20confidence/github-copilot-access-transition.mp4",
+          "captions": "https://ghuniverseroadtrip.blob.core.windows.net/videos/GitHub%20Enterprise%20-%20Scale%20AI-powered%20development%20with%20confidence/github-copilot-access-transition.vtt",
+          "duration": 145.43,
+          "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/GitHub%20Enterprise%20-%20Scale%20AI-powered%20development%20with%20confidence/github-copilot-access-transition.jpg"
+        },
+        {
           "title": "GitHub Issues: Issue Intents",
           "description": "A narrated demo by Gwyneth Peña-Siguenza (about 3 min 45 s). It shows how issue intents keep issue metadata up to date. Users filter issues with pending suggestions, read the confidence and rationale of each suggestion, and accept or decline it. It also shows the automation levels (full control, cautious, balanced), a GitHub Agentic Workflow in Markdown that sets issue intent for issue-type and issue-field actions, and the safe outputs in GitHub Actions.",
           "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/GitHub%20Enterprise%20-%20Scale%20AI-powered%20development%20with%20confidence/issue-intents-v2.mp4",
