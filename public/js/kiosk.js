@@ -37,7 +37,7 @@ export function createKiosk({ backend, onExit }) {
     onOpen: (i) => openFolder(i),
     onIndex: (i) => $$('button', homeDots).forEach((d, k) => d.classList.toggle('is-active', k === i)),
   });
-  const player = createPlayer($('#player'), { onClose: onPlayerClosed, onCaptions: (on) => (captionsOn = on), onMuted: (on) => (mutedOn = on), onEnded: playNext });
+  const player = createPlayer($('#player'), { onClose: onPlayerClosed, onCaptions: (on) => (captionsOn = on), onMuted: (on) => (mutedOn = on), onEnded: playNext, onError: skipFailed });
 
   $('.nav.prev', home).addEventListener('click', () => carousel.prev());
   $('.nav.next', home).addEventListener('click', () => carousel.next());
@@ -250,9 +250,23 @@ export function createKiosk({ backend, onExit }) {
   // last video the first plays again, until a viewer selects Back.
   function playNext() {
     if (!catalog.settings.loopPlayback || folderIndex < 0) return false;
+    failedInRow = 0;
     markWatched(currentRow);
     playVideo((currentRow + 1) % catalog.folders[folderIndex].videos.length, { replace: true });
     return true;
+  }
+
+  // Loop playback: a video that cannot play is skipped. If all the videos in the folder fail
+  // one after the other (for example, the network is down), wait longer before the next try.
+  let failedInRow = 0;
+  function skipFailed() {
+    if (!catalog.settings.loopPlayback || folderIndex < 0) return null;
+    const count = catalog.folders[folderIndex].videos.length;
+    failedInRow++;
+    return {
+      wait: failedInRow >= count ? 30_000 : 3000,
+      next: () => playVideo((currentRow + 1) % count, { replace: true }),
+    };
   }
 
   function markWatched(vi) {
@@ -316,7 +330,10 @@ export function createKiosk({ backend, onExit }) {
 
   function idleTick() {
     const t = performance.now();
-    if (player.isPlaying) lastInput = t;
+    if (player.shouldPlay) {
+      lastInput = t; // Watching counts as activity. A video that a viewer paused does not.
+      player.keepPlaying();
+    }
     const idle = t - lastInput;
     root.classList.toggle('hide-cursor', idle > CURSOR_HIDE_MS);
 

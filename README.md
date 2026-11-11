@@ -60,7 +60,11 @@ reload shows it at once.
   next video. When a video ends, the list returns at the same place, with a check on that video.
 - **Loop video playback:** when this setting is on, the videos in a folder play one after
   another. After the last video, the first plays again, until a viewer selects Back. Idle
-  reset never stops a playing video, so the loop runs until someone stops it.
+  reset never stops a playing video, so the loop runs until someone stops it. If a video
+  cannot play, or does not move for 45 seconds, the next video plays. If all the videos fail
+  (for example, the network is down), the kiosk waits 30 seconds between tries. If the
+  browser pauses a video (for example, in a hidden window), the kiosk starts it again. If
+  the browser blocks sound, the video plays without sound.
 - **Mute videos:** when this setting is on, every video starts without sound. Turn captions on
   so viewers can still follow along.
 - **Idle:** after the idle time, the kiosk returns to the start screen and resets captions,
