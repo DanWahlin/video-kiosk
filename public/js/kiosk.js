@@ -42,6 +42,7 @@ export function createKiosk({ backend, onExit }) {
   $('.nav.prev', home).addEventListener('click', () => carousel.prev());
   $('.nav.next', home).addEventListener('click', () => carousel.next());
   back.addEventListener('click', () => goHome());
+  $('.count', folderScreen).addEventListener('click', playAll);
 
   // ---- Loading ----
   async function load() {
@@ -143,7 +144,7 @@ export function createKiosk({ backend, onExit }) {
         : [h('strong', {}, folder.title)]),
     );
     const n = folder.videos.length;
-    $('.count span:last-child', folderScreen).textContent = `${n} ${n === 1 ? 'Video' : 'Videos'}`;
+    $('.count-text', folderScreen).textContent = n === 1 ? 'Play 1 Video' : `Play all ${n} Videos`;
 
     const hero = $('.hero-slot', folderScreen);
     $('.fcard', hero)?.remove();
@@ -182,7 +183,7 @@ export function createKiosk({ backend, onExit }) {
       {},
       h(
         'button',
-        { class: 'vrow', type: 'button', 'data-index': vi, onclick: () => playVideo(vi) },
+        { class: 'vrow', type: 'button', 'data-index': vi, onclick: () => ((loopAll = false), playVideo(vi)) },
         thumb,
         h('div', { class: 'vtext' }, h('h3', {}, v.title), v.description ? h('p', {}, v.description) : null),
       ),
@@ -247,9 +248,19 @@ export function createKiosk({ backend, onExit }) {
   }
 
   // Loop playback: when a video ends, the next one in the folder plays, and after the
-  // last video the first plays again, until a viewer selects Back.
+  // last video the first plays again, until a viewer selects Back. The "Loop video playback"
+  // setting turns it on for every video; "Play all" turns it on until the player closes.
+  let loopAll = false;
+  const looping = () => (catalog.settings.loopPlayback || loopAll) && folderIndex >= 0;
+
+  function playAll() {
+    loopAll = true;
+    failedInRow = 0;
+    playVideo(0);
+  }
+
   function playNext() {
-    if (!catalog.settings.loopPlayback || folderIndex < 0) return false;
+    if (!looping()) return false;
     failedInRow = 0;
     markWatched(currentRow);
     playVideo((currentRow + 1) % catalog.folders[folderIndex].videos.length, { replace: true });
@@ -260,7 +271,7 @@ export function createKiosk({ backend, onExit }) {
   // one after the other (for example, the network is down), wait longer before the next try.
   let failedInRow = 0;
   function skipFailed() {
-    if (!catalog.settings.loopPlayback || folderIndex < 0) return null;
+    if (!looping()) return null;
     const count = catalog.folders[folderIndex].videos.length;
     failedInRow++;
     return {
@@ -276,6 +287,7 @@ export function createKiosk({ backend, onExit }) {
   }
 
   function onPlayerClosed(reason) {
+    loopAll = false;
     if (reason === 'home' || reason === 'exit') return;
     noteInput(); // Watching counts as activity, so the idle timer starts again from here.
     if (folderIndex < 0) return;
@@ -312,7 +324,7 @@ export function createKiosk({ backend, onExit }) {
       if (fi < 0) goHome({ animate: false });
       else {
         if (folderIndex !== fi || folderScreen.hidden) openFolder(fi, { animate: false });
-        if (vi >= 0 && !(player.isOpen && currentRow === vi)) playVideo(vi);
+        if (vi >= 0 && !(player.isOpen && currentRow === vi)) (loopAll = false), playVideo(vi);
         else if (vi < 0 && player.isOpen) player.close('link');
       }
     } finally {

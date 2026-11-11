@@ -9,7 +9,7 @@ the list at the same place.
 - Node.js (Express) with plain HTML, CSS, and JavaScript. No build step to run it locally.
 - Themes: **Dark**, **Light**, **GitHub Dark**, **GitHub Light**, **VS Code Dark**, and **VS Code Light**.
 - Closed captions from `.vtt` files, with **CC** and sound on/off buttons in the player.
-- Loop video playback (a folder plays like a playlist) and a **Mute videos** setting.
+- **Play all** and a Loop video playback setting (a folder plays like a playlist), and a **Mute videos** setting.
 - Touch, mouse, and keyboard: tap or click any folder card, swipe or drag the carousel, or use the arrow keys.
 - Works offline with `npm start`: fonts, icons, and videos are local. It can also run as a
   static site on Azure, with the videos in Blob Storage (see [Deploy to Azure](#deploy-to-azure)).
@@ -53,18 +53,21 @@ reload shows it at once.
 
 - **Home:** tap any folder card to open it. Swipe or use the arrows and dots to turn the carousel.
   The gear in the top-right corner opens the settings.
-- **Video list:** tap a video to play it. **Back** or **Home** returns to the carousel.
+- **Video list:** tap a video to play it. **Play all** (top-right corner) plays the folder's
+  videos in a loop, from the first video, until a viewer selects Back. It works when the
+  **Loop video playback** setting is off. **Back** or **Home** returns to the carousel.
 - **Player:** tap the video to show the controls, then tap to pause or play. The back arrow
   (top-left corner) is always visible; it shows **Back** when the video is paused. The speaker
   button turns sound on or off, and **CC** turns captions on or off; both choices carry to the
   next video. When a video ends, the list returns at the same place, with a check on that video.
-- **Loop video playback:** when this setting is on, the videos in a folder play one after
-  another. After the last video, the first plays again, until a viewer selects Back. Idle
-  reset never stops a playing video, so the loop runs until someone stops it. If a video
-  cannot play, or does not move for 45 seconds, the next video plays. If all the videos fail
-  (for example, the network is down), the kiosk waits 30 seconds between tries. If the
-  browser pauses a video (for example, in a hidden window), the kiosk starts it again. If
-  the browser blocks sound, the video plays without sound.
+- **Loop video playback:** when this setting is on, each video that a viewer plays starts a
+  loop: the videos in the folder play one after another. After the last video, the first plays
+  again, until a viewer selects Back. Idle reset never stops a playing video, so the loop runs
+  until someone stops it. These rules also apply to **Play all**. If a video cannot play, or
+  does not move for 45 seconds, the next video plays. If all the videos fail (for example, the
+  network is down), the kiosk waits 30 seconds between tries. If the browser pauses a video
+  (for example, in a hidden window), the kiosk starts it again. If the browser blocks sound,
+  the video plays without sound.
 - **Mute videos:** when this setting is on, every video starts without sound. Turn captions on
   so viewers can still follow along.
 - **Idle:** after the idle time, the kiosk returns to the start screen and resets captions,

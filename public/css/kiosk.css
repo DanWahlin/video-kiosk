@@ -415,6 +415,19 @@ button.pill:active {
   gap: 2em;
   margin: 1.2em 0 0.9em;
 }
+/* "Play all N Videos": plays the folder in a loop. */
+.count {
+  flex: none;
+}
+.count:focus-visible {
+  border-color: rgb(var(--active) / 0.8);
+}
+@media (hover: hover) {
+  .count:hover {
+    border-color: rgb(var(--active) / 0.8);
+    box-shadow: 0 0 1.6em rgb(var(--active) / calc(0.35 * var(--glow))), inset 0 1px 0 var(--glass-hi);
+  }
+}
 .crumbs {
   display: flex;
   align-items: center;
