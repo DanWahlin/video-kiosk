@@ -112,7 +112,6 @@
           "title": "Fix the dependency risks that matter first with Dependabot",
           "description": "A narrated explainer video. A long list of dependency alerts does not tell you what to fix first. It shows how to add evidence from your code and your running application: start with severity, then filter Dependabot alerts by reachability and by deployment and runtime context. It then opens one alert, follows the call path, checks the linked workload, and picks a patched version, so the remediation decision stays grounded in evidence.",
           "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/GitHub%20Advanced%20Security%20-%20Found%20means%20fixed/github-dependabot-prioritization.mp4",
-          "captions": "https://ghuniverseroadtrip.blob.core.windows.net/videos/GitHub%20Advanced%20Security%20-%20Found%20means%20fixed/github-dependabot-prioritization.vtt",
           "duration": 183.07,
           "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/GitHub%20Advanced%20Security%20-%20Found%20means%20fixed/github-dependabot-prioritization.jpg"
         },
