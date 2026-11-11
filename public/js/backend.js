@@ -86,10 +86,14 @@ function staticBackend(config) {
       shortcuts: [],
       entries: catalogs.map((c) => ({ name: c.file.split('/').pop(), path: c.file, kind: 'json' })),
     }),
+    // A link can pick the catalog (?catalog=<file name without .json>) for this visit only.
     async getCatalog() {
       const s = load();
-      const catalog = await request('GET', s.catalog);
-      return { ...catalog, settings: s };
+      const stem = (file) => file.split('/').pop().replace(/\.json$/, '');
+      const requested = new URLSearchParams(location.search).get('catalog');
+      const entry = catalogs.find((c) => stem(c.file) === requested) ?? find(s.catalog);
+      const catalog = await request('GET', entry.file);
+      return { ...catalog, settings: s, catalogId: stem(entry.file) };
     },
   };
 }

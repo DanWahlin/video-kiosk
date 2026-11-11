@@ -73,10 +73,37 @@ reload shows it at once.
   down in full screen on a Mac, so the menu bar does not cover them, and it hides the pointer
   after 3 seconds.
 
+## Links to a list or a video
+
+The address changes as you move through the kiosk, so you can copy it to link to a screen:
+
+| Link | Opens |
+|---|---|
+| `#kiosk` | The start screen |
+| `#kiosk/github-enterprise` | The GitHub Enterprise video list |
+| `#kiosk/github-enterprise/budget-delegation` | That video, in its list |
+
+- **Folder IDs** come from the folder title. When two folders have the same title (for
+  example, the two "GitHub Copilot" folders), the description is added:
+  `#kiosk/github-copilot-desktop-app-cli-sdk`.
+- **Video IDs** are the video's file name without `.mp4`, so a link still works after the
+  title changes.
+- **On the static site**, links also name the catalog, for example
+  `https://<site>/?catalog=ignite-azure-11-2026#kiosk/azure-devops`. The catalog applies only
+  to that visit; the settings page choice stays the same.
+- If a link names a folder or video that is not in the catalog, the kiosk opens the closest
+  screen (the folder's list, or the start screen).
+- The browser's Back and Forward buttons move between screens.
+- A video link that is opened in a new tab may not start until someone taps play, because
+  browsers block videos with sound from playing on their own. Muted videos start at once, and
+  the kiosk-mode commands below can allow sound.
+
 ## Start a browser in kiosk mode
 
-Open `http://localhost:3000/#kiosk` to start the kiosk without the settings page. Start
-the server first. The kiosk flags work only if the browser is not already open, so these
+Open `http://localhost:3000/#kiosk` (or a [link to a list or a video](#links-to-a-list-or-a-video))
+to start the kiosk without the settings page. Start the server first. Add
+`--autoplay-policy=no-user-gesture-required` to the commands to let videos with sound start on
+their own. The kiosk flags work only if the browser is not already open, so these
 commands use a separate profile folder.
 
 **macOS**

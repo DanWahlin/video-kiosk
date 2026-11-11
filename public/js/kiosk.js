@@ -89,10 +89,10 @@ export function createKiosk({ backend, onExit }) {
     return document.startViewTransition(update);
   }
 
-  function openFolder(i) {
+  function openFolder(i, { animate = true } = {}) {
+    setUrl(i);
     const card = carousel.cards[i];
-    card.style.viewTransitionName = 'folder-hero';
-    transition(() => {
+    const show = () => {
       card.style.viewTransitionName = '';
       // Center the opened folder, so Back returns to it.
       carousel.go(i, { instant: true });
@@ -100,10 +100,14 @@ export function createKiosk({ backend, onExit }) {
       home.hidden = true;
       folderScreen.hidden = false;
       back.hidden = false;
-    });
+    };
+    if (!animate) return show();
+    card.style.viewTransitionName = 'folder-hero';
+    transition(show);
   }
 
-  function goHome({ reset = false } = {}) {
+  function goHome({ reset = false, animate = true } = {}) {
+    setUrl(-1, -1, { replace: reset });
     if (player.isOpen) player.close('home');
     const wasFolder = !folderScreen.hidden;
     if (reset) {
@@ -114,13 +118,14 @@ export function createKiosk({ backend, onExit }) {
     }
     if (!wasFolder) return;
     const center = carousel.cards[carousel.index];
-    const vt = transition(() => {
+    const show = () => {
       folderScreen.hidden = true;
       back.hidden = true;
       home.hidden = false;
       folderIndex = -1;
-      if (center && document.startViewTransition) center.style.viewTransitionName = 'folder-hero';
-    });
+      if (center && animate && document.startViewTransition) center.style.viewTransitionName = 'folder-hero';
+    };
+    const vt = animate ? transition(show) : (show(), null);
     const clear = () => center && (center.style.viewTransitionName = '');
     vt ? vt.finished.finally(clear) : clear();
   }
@@ -235,7 +240,8 @@ export function createKiosk({ backend, onExit }) {
   new ResizeObserver(() => !folderScreen.hidden && updateListDots()).observe(listWrap);
 
   // ---- Playback ----
-  function playVideo(vi) {
+  function playVideo(vi, { replace = false } = {}) {
+    setUrl(folderIndex, vi, { replace });
     markCurrent(vi);
     player.open(catalog.folders[folderIndex].videos[vi], { captions: captionsOn, muted: mutedOn });
   }
@@ -245,7 +251,7 @@ export function createKiosk({ backend, onExit }) {
   function playNext() {
     if (!catalog.settings.loopPlayback || folderIndex < 0) return false;
     markWatched(currentRow);
-    playVideo((currentRow + 1) % catalog.folders[folderIndex].videos.length);
+    playVideo((currentRow + 1) % catalog.folders[folderIndex].videos.length, { replace: true });
     return true;
   }
 
@@ -259,10 +265,46 @@ export function createKiosk({ backend, onExit }) {
     if (reason === 'home' || reason === 'exit') return;
     noteInput(); // Watching counts as activity, so the idle timer starts again from here.
     if (folderIndex < 0) return;
+    // Back in the player adds a history entry; a video that ends or fails replaces it.
+    setUrl(folderIndex, -1, { replace: reason !== 'closed' });
     if (reason === 'ended') markWatched(currentRow);
     const row = $$('.vrow', list)[currentRow];
     row?.scrollIntoView({ block: 'nearest' });
     row?.focus({ preventScroll: true });
+  }
+
+  // ---- Links: #kiosk/<folder id>/<video id> ----
+  // The URL follows the screen, so a link (or a browser reload) opens the same list or video.
+  let following = false; // True while the kiosk follows a link, so it does not write the URL back.
+
+  function setUrl(fi, vi = -1, { replace = false } = {}) {
+    if (following || !listeners) return;
+    const f = catalog.folders[fi];
+    const hash = !f ? '#kiosk' : vi < 0 ? `#kiosk/${f.id}` : `#kiosk/${f.id}/${f.videos[vi].id}`;
+    // On the static site, the link also names the catalog, so it opens the same videos anywhere.
+    const search = catalog.catalogId ? `?catalog=${encodeURIComponent(catalog.catalogId)}` : location.search;
+    const url = location.pathname + search + hash;
+    if (url !== location.pathname + location.search + location.hash) history[replace ? 'replaceState' : 'pushState'](null, '', url);
+  }
+
+  // Shows the folder and video that the URL names. A part that is not in the catalog
+  // falls back to the screen above it (the folder list, or the start screen).
+  function followUrl() {
+    const [, folderId, videoId] = location.hash.slice(1).split('/').map((part) => decodeURIComponent(part));
+    const fi = catalog.folders.findIndex((f) => f.id === folderId);
+    const vi = fi < 0 ? -1 : catalog.folders[fi].videos.findIndex((v) => v.id === videoId);
+    following = true;
+    try {
+      if (fi < 0) goHome({ animate: false });
+      else {
+        if (folderIndex !== fi || folderScreen.hidden) openFolder(fi, { animate: false });
+        if (vi >= 0 && !(player.isOpen && currentRow === vi)) playVideo(vi);
+        else if (vi < 0 && player.isOpen) player.close('link');
+      }
+    } finally {
+      following = false;
+    }
+    setUrl(fi, vi, { replace: true });
   }
 
   // ---- Idle, attract mode, cursor ----
@@ -372,6 +414,8 @@ export function createKiosk({ backend, onExit }) {
     addEventListener('contextmenu', (e) => e.preventDefault(), { signal });
     addEventListener('resize', syncFullscreen, { signal });
     document.addEventListener('fullscreenchange', syncFullscreen, { signal });
+    addEventListener('popstate', followUrl, { signal });
+    followUrl();
   }
 
   function exit() {

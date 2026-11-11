@@ -9,7 +9,7 @@ const admin = createAdmin({ backend, onLaunch: () => kiosk.launch({ fullscreen: 
 const kiosk = createKiosk({
   backend,
   onExit: () => {
-    if (location.hash) history.replaceState(null, '', location.pathname);
+    if (location.hash || location.search) history.replaceState(null, '', location.pathname);
     admin.show();
   },
 });
@@ -22,9 +22,11 @@ function startFromHash() {
     admin.show();
   });
 }
+// Links: "#kiosk", "#kiosk/<folder>", and "#kiosk/<folder>/<video>" open the kiosk on that screen.
+const isKioskLink = () => location.hash === '#kiosk' || location.hash.startsWith('#kiosk/');
 addEventListener('hashchange', () => {
-  if (location.hash === '#kiosk' && $('#kiosk').hidden) startFromHash();
+  if (isKioskLink() && $('#kiosk').hidden) startFromHash();
 });
 
-if (location.hash === '#kiosk') startFromHash();
+if (isKioskLink()) startFromHash();
 else admin.show();
