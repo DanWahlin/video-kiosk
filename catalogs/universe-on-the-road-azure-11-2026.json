@@ -468,7 +468,7 @@
         },
         {
           "title": "GitHub Enterprise: Scheduling Copilot Access Transitions",
-          "description": "A narrated explainer video. Show how an enterprise admin explores the Copilot access billing model, reviews its impact, prepares the settings, and schedules the transition for the first day of a billing cycle.",
+          "description": "Show how an enterprise admin explores the Copilot access billing model, reviews its impact, prepares the settings, and schedules the transition for the first day of a billing cycle.",
           "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/GitHub%20Enterprise%20-%20Scale%20AI-powered%20development%20with%20confidence/github-copilot-access-transition.mp4",
           "captions": "https://ghuniverseroadtrip.blob.core.windows.net/videos/GitHub%20Enterprise%20-%20Scale%20AI-powered%20development%20with%20confidence/github-copilot-access-transition.vtt",
           "duration": 145.43,
