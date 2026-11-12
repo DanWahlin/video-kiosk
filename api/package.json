@@ -1,0 +1,16 @@
+{
+  "name": "video-kiosk-api",
+  "private": true,
+  "description": "Video management API for the static kiosk site (Azure Static Web Apps managed functions). npm run build:api copies it, with lib/ and the catalogs, to dist-api/.",
+  "type": "module",
+  "main": "src/functions/*.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.8.0",
+    "@azure/storage-blob": "^12.28.0",
+    "@primer/octicons": "^19.42.0",
+    "ajv": "^8.20.0"
+  }
+}

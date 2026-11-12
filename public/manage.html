@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en" data-theme="github-dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Video management</title>
+    <link rel="preload" href="/fonts/mona-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/admin.css" />
+    <link rel="stylesheet" href="/css/manage.css" />
+    <script type="module" src="/js/manage.js"></script>
+  </head>
+  <body>
+    <div class="backdrop" aria-hidden="true">
+      <div class="aurora a1"></div>
+      <div class="aurora a2"></div>
+      <div class="floor-glow"></div>
+    </div>
+
+    <main class="admin manage">
+      <div class="admin-panel">
+        <header class="admin-head">
+          <div class="logo"><span class="icon" data-icon="video"></span></div>
+          <div class="grow">
+            <h1>Video management</h1>
+            <p id="who">Signing in…</p>
+          </div>
+          <a class="btn" href="/"><span class="icon" data-icon="gear"></span>Settings</a>
+          <a class="btn" href="/.auth/logout?post_logout_redirect_uri=/"><span class="icon" data-icon="sign-out"></span>Sign out</a>
+        </header>
+
+        <section id="gate" class="card" hidden>
+          <h2>No access</h2>
+          <p id="gate-text" class="hint"></p>
+        </section>
+
+        <section id="main" class="card" hidden>
+          <div class="manage-top">
+            <label class="field">
+              Catalog
+              <select id="catalog"></select>
+            </label>
+            <p id="published" class="hint"></p>
+          </div>
+          <div class="toolbar">
+            <label class="search">
+              <span class="icon" data-icon="search"></span>
+              <input id="filter" type="search" placeholder="Find a video" autocomplete="off" aria-label="Find a video" />
+            </label>
+            <button id="add" class="btn" type="button"><span class="icon" data-icon="plus"></span>Add video</button>
+            <button id="history" class="btn" type="button"><span class="icon" data-icon="history"></span>History</button>
+            <button id="download" class="btn" type="button"><span class="icon" data-icon="download"></span>Download JSON</button>
+            <span class="spacer"></span>
+            <span id="changes" class="changes"></span>
+            <button id="discard" class="btn" type="button" disabled>Discard</button>
+            <button id="publish" class="btn btn-primary small" type="button" disabled><span class="icon" data-icon="upload"></span>Publish</button>
+          </div>
+          <div class="table-wrap">
+            <table class="videos">
+              <thead>
+                <tr>
+                  <th class="c-thumb"><span class="sr-only">Thumbnail</span></th>
+                  <th>Video</th>
+                  <th class="c-dur">Length</th>
+                  <th class="c-on">In kiosk</th>
+                  <th class="c-edit"><span class="sr-only">Edit</span></th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Add a video -->
+    <dialog id="add-dialog" class="sheet">
+      <form id="add-form" method="dialog" novalidate>
+        <h3>Add a video</h3>
+        <label class="field">
+          Kiosk folder
+          <select id="add-folder"></select>
+        </label>
+        <div id="new-folder" class="grid-2" hidden>
+          <label class="field">Folder title<input id="nf-title" type="text" maxlength="80" placeholder="GitHub Copilot" /></label>
+          <label class="field">Folder description<input id="nf-desc" type="text" maxlength="200" placeholder="Desktop App, CLI, SDK" /></label>
+          <label class="field"><span>Folder icon (<a href="https://primer.style/octicons" target="_blank" rel="noopener">Octicon</a> name)</span><input id="nf-icon" type="text" maxlength="60" value="file-directory" spellcheck="false" /></label>
+        </div>
+        <p class="hint">Storage folder: <code id="add-storage"></code></p>
+        <label class="field">Video title<input id="add-title" type="text" maxlength="140" required /></label>
+        <label class="field">Description<textarea id="add-desc" rows="3" maxlength="1000"></textarea></label>
+        <div class="grid-2">
+          <label class="field">Video file (.mp4, .m4v, or .webm)<input id="add-file" type="file" accept=".mp4,.m4v,.webm,video/mp4,video/webm" required /></label>
+          <label class="field">Captions (optional .vtt file)<input id="add-captions" type="file" accept=".vtt,text/vtt" /></label>
+        </div>
+        <ol id="steps" class="steps" hidden></ol>
+        <p id="add-error" class="form-error" role="alert" hidden></p>
+        <div class="sheet-foot">
+          <button id="add-cancel" class="btn" type="button">Cancel</button>
+          <button id="add-go" class="btn btn-primary small" type="submit"><span class="icon" data-icon="upload"></span>Upload</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Edit a video -->
+    <dialog id="edit-dialog" class="sheet">
+      <form id="edit-form" method="dialog">
+        <h3>Edit video</h3>
+        <p id="edit-file" class="hint"></p>
+        <label class="field">Title<input id="edit-title" type="text" maxlength="140" required /></label>
+        <label class="field">Description<textarea id="edit-desc" rows="5" maxlength="1000"></textarea></label>
+        <div class="sheet-foot">
+          <button id="edit-cancel" class="btn" type="button">Cancel</button>
+          <button class="btn btn-primary small" type="submit">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Publish -->
+    <dialog id="publish-dialog" class="sheet">
+      <form id="publish-form" method="dialog">
+        <h3>Publish changes</h3>
+        <p class="hint">Kiosks get the change in about a minute. The last version stays in the history, so you can restore it.</p>
+        <ul id="publish-list" class="change-list"></ul>
+        <label class="field">Note (optional)<input id="publish-note" type="text" maxlength="300" placeholder="Why you made the change" /></label>
+        <p id="publish-error" class="form-error" role="alert" hidden></p>
+        <div class="sheet-foot">
+          <button id="publish-cancel" class="btn" type="button">Not now</button>
+          <button id="publish-go" class="btn btn-primary small" type="submit"><span class="icon" data-icon="upload"></span>Publish</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- History -->
+    <dialog id="history-dialog" class="sheet">
+      <div class="sheet-inner">
+        <h3>History</h3>
+        <p class="hint">Restore loads a version as unpublished changes. Publish it to make it live.</p>
+        <ul id="history-list" class="history-list"></ul>
+        <div class="sheet-foot">
+          <button id="history-close" class="btn" type="button">Close</button>
+        </div>
+      </div>
+    </dialog>
+
+    <div id="toast" class="note-toast" role="status" aria-live="polite" hidden></div>
+  </body>
+</html>

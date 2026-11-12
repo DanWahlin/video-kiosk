@@ -79,6 +79,10 @@
           "description": "Optional length in seconds. If you omit it, the server reads it from the file (needs ffprobe).",
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "enabled": {
+          "description": "Optional. false hides the video in the kiosk but keeps it in the catalog. Default: true.",
+          "type": "boolean"
         }
       }
     }

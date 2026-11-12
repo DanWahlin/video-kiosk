@@ -1,6 +1,7 @@
-# Checks the catalogs and builds the static kiosk site for each pull request to main.
-# On each push to main (for example, a merged pull request), it also deploys dist/ to
-# Azure Static Web Apps and checks that the live site serves the new build.
+# Checks the catalogs and builds the static kiosk site and the video management API for each
+# pull request to main. On each push to main (for example, a merged pull request), it also
+# deploys dist/ and dist-api/ to Azure Static Web Apps and checks that the live site serves
+# the new build.
 # If a check or the build fails, nothing is deployed and the live site keeps its last good copy.
 # The videos are in Azure Blob Storage, so the build does not need them.
 name: Deploy to Azure Static Web Apps
@@ -42,6 +43,11 @@ jobs:
       - name: Build the static site
         run: npm run build:static
 
+      - name: Build the video management API
+        run: |
+          npm run build:api
+          npm ci --omit=dev --prefix dist-api
+
       - name: Deploy dist/
         id: deploy
         if: github.event_name != 'pull_request'
@@ -51,7 +57,9 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           action: upload
           app_location: dist
+          api_location: dist-api
           skip_app_build: true
+          skip_api_build: true
 
       # A deploy can fail for a short time on the Azure side. Try one more time.
       - name: Wait before the second try
@@ -66,7 +74,9 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           action: upload
           app_location: dist
+          api_location: dist-api
           skip_app_build: true
+          skip_api_build: true
 
       - name: Check the live site
         if: github.event_name != 'pull_request'

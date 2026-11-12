@@ -534,3 +534,18 @@ dialog.browser::backdrop {
 .admin.is-static .segmented {
   display: none;
 }
+
+/* Video management (static site only) */
+.manage-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--pill-border);
+}
+.manage-link .hint {
+  font-size: 14px;
+  color: var(--text-2);
+}

@@ -4,6 +4,7 @@
     "catalogs/universe-on-the-road-azure-11-2026.json",
     "catalogs/ignite-azure-11-2026.json"
   ],
+  "liveCatalogs": "https://ghuniverseroadtrip.blob.core.windows.net/catalogs",
   "mediaVersion": 3,
   "defaults": {
     "theme": "github-dark",

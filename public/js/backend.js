@@ -26,7 +26,26 @@ const serverBackend = {
   reload: () => request('POST', '/api/reload'),
   browse: (type, dir) => request('GET', `/api/browse?files=${type === 'json' ? 'json' : ''}&dir=${encodeURIComponent(dir ?? '')}`),
   getCatalog: () => request('GET', '/api/catalog'),
+  checkCatalog: async () => null,
 };
+
+// mediaVersion goes on each media URL, so browsers do not use copies that they stored
+// before a file changed (the build adds it to its own copy of each catalog).
+function addMediaVersion(catalog, version) {
+  if (!version) return catalog;
+  const v = (src) => {
+    if (!src) return src;
+    const url = new URL(src, location.href);
+    if (url.origin === location.origin || url.searchParams.has('v')) return src;
+    url.searchParams.set('v', String(version));
+    return url.href;
+  };
+  for (const f of catalog.folders) for (const x of f.videos) Object.assign(x, { src: v(x.src), captions: v(x.captions), thumbnail: v(x.thumbnail) });
+  return catalog;
+}
+
+const looksLikeCatalog = (c) =>
+  c && typeof c.title === 'string' && Array.isArray(c.folders) && c.folders.length > 0 && c.folders.every((f) => Array.isArray(f.videos) && f.videos.length > 0);
 
 function staticBackend(config) {
   const catalogs = config.catalogs;
@@ -87,16 +106,39 @@ function staticBackend(config) {
       entries: catalogs.map((c) => ({ name: c.file.split('/').pop(), path: c.file, kind: 'json' })),
     }),
     // A link can pick the catalog (?catalog=<file name without .json>) for this visit only.
+    // The catalog that Video management published comes first; the copy in this build is
+    // the fallback (before the first publish, or when Blob Storage does not answer).
     async getCatalog() {
       const s = load();
-      const stem = (file) => file.split('/').pop().replace(/\.json$/, '');
       const requested = new URLSearchParams(location.search).get('catalog');
       const entry = catalogs.find((c) => stem(c.file) === requested) ?? find(s.catalog);
-      const catalog = await request('GET', entry.file);
-      return { ...catalog, settings: s, catalogId: stem(entry.file) };
+      const id = stem(entry.file);
+      const live = await fetchLive(id);
+      const catalog = live?.catalog ?? (await request('GET', entry.file));
+      return { ...catalog, settings: s, catalogId: id, liveVersion: live?.version ?? null };
+    },
+    // A newer published catalog, or null. The kiosk checks about once a minute.
+    async checkCatalog(current) {
+      const live = await fetchLive(current.catalogId);
+      if (!live || live.version === current.liveVersion) return null;
+      return { ...live.catalog, settings: current.settings, catalogId: current.catalogId, liveVersion: live.version };
     },
   };
+
+  async function fetchLive(id) {
+    if (!config.liveCatalogs) return null;
+    try {
+      const res = await fetch(`${config.liveCatalogs}/${encodeURIComponent(id)}.json`, { cache: 'no-cache', signal: AbortSignal.timeout(10_000) });
+      if (!res.ok) return null;
+      const catalog = await res.json();
+      if (!looksLikeCatalog(catalog)) return null;
+      return { catalog: addMediaVersion(catalog, config.mediaVersion), version: catalog.version ?? res.headers.get('etag') };
+    } catch {
+      return null;
+    }
+  }
 }
+const stem = (file) => file.split('/').pop().replace(/\.json$/, '');
 
 export async function createBackend() {
   try {

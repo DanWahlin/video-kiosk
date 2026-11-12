@@ -7,6 +7,8 @@ const ATTRACT_AFTER_MS = 20_000;
 const ATTRACT_STEP_MS = 6_000;
 const CURSOR_HIDE_MS = 3_000;
 const SETTINGS_HOLD_MS = 3_000;
+const CATALOG_CHECK_MS = 60_000;
+const APPLY_AFTER_IDLE_MS = 5_000;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 export function createKiosk({ backend, onExit }) {
@@ -31,6 +33,8 @@ export function createKiosk({ backend, onExit }) {
   let idleResetDone = false;
   let lastAttract = 0;
   let timer = 0;
+  let checkTimer = 0;
+  let pendingCatalog = null; // A newer published catalog, waiting for a quiet moment
   let listeners = null; // AbortController for the page-wide listeners while the kiosk runs
 
   const carousel = new Carousel($('.stage', home), $('.carousel', home), {
@@ -47,6 +51,10 @@ export function createKiosk({ backend, onExit }) {
   // ---- Loading ----
   async function load() {
     catalog = await backend.getCatalog();
+    render();
+  }
+
+  function render() {
     applyTheme(catalog.settings.theme);
     player.setCaptionSize(catalog.settings.captionSize);
     const lightTheme = catalog.settings.theme.endsWith('light');
@@ -131,7 +139,7 @@ export function createKiosk({ backend, onExit }) {
     vt ? vt.finished.finally(clear) : clear();
   }
 
-  function renderFolder(i) {
+  function renderFolder(i, { enter = true } = {}) {
     folderIndex = i;
     const folder = catalog.folders[i];
     const color = carousel.colorFor(i).join(' ');
@@ -160,9 +168,11 @@ export function createKiosk({ backend, onExit }) {
     list.replaceChildren(...folder.videos.map((v, vi) => videoRow(v, vi, fallbackMask)));
     markCurrent(0);
     listWrap.scrollTop = 0;
-    folderScreen.classList.remove('screen-enter');
-    void folderScreen.offsetWidth;
-    folderScreen.classList.add('screen-enter');
+    if (enter) {
+      folderScreen.classList.remove('screen-enter');
+      void folderScreen.offsetWidth;
+      folderScreen.classList.add('screen-enter');
+    }
     requestAnimationFrame(updateListDots);
   }
 
@@ -177,7 +187,7 @@ export function createKiosk({ backend, onExit }) {
     }
     thumb.append(h('span', { class: 'play' }, icon('play')));
     if (v.duration) thumb.append(h('span', { class: 'dur' }, formatTime(v.duration)));
-    if (watched.has(`${folderIndex}:${vi}`)) thumb.append(watchedBadge());
+    if (watched.has(videoKey(folderIndex, vi))) thumb.append(watchedBadge());
     return h(
       'li',
       {},
@@ -190,6 +200,7 @@ export function createKiosk({ backend, onExit }) {
     );
   }
 
+  const videoKey = (fi, vi) => `${catalog.folders[fi]?.id}/${catalog.folders[fi]?.videos[vi]?.id}`;
   const watchedBadge = () => h('span', { class: 'watched', html: iconSvg('check-circle-fill') });
 
   // Curved light lines from the folder card to the list.
@@ -263,8 +274,59 @@ export function createKiosk({ backend, onExit }) {
     if (!looping()) return false;
     failedInRow = 0;
     markWatched(currentRow);
-    playVideo((currentRow + 1) % catalog.folders[folderIndex].videos.length, { replace: true });
+    let next = currentRow + 1;
+    // A newer catalog starts between two videos, so a disabled video leaves the loop.
+    if (pendingCatalog) {
+      const row = currentRow;
+      const kept = applyCatalog();
+      if (folderIndex < 0) return true; // The folder is gone; the kiosk is on the start screen.
+      // The video that ended has its new place; if it is gone, the video now in its old place is next.
+      next = kept ? currentRow + 1 : row;
+    }
+    playVideo(next % catalog.folders[folderIndex].videos.length, { replace: true });
     return true;
+  }
+
+  // ---- Catalog updates (Video management on the static site) ----
+  async function checkCatalog() {
+    try {
+      const next = await backend.checkCatalog(pendingCatalog ?? catalog);
+      if (next) pendingCatalog = next;
+    } catch {
+      // Try again at the next check.
+    }
+  }
+
+  // Shows the pending catalog and keeps the viewer's place: the same folder and the same video
+  // (by ID). Returns false when the current video is not in the new catalog.
+  function applyCatalog() {
+    const next = pendingCatalog;
+    pendingCatalog = null;
+    if (!next) return true;
+    const folderId = catalog.folders[folderIndex]?.id;
+    const videoId = catalog.folders[folderIndex]?.videos[currentRow]?.id;
+    const homeId = catalog.folders[carousel.index]?.id;
+    const row = currentRow;
+    const scroll = listWrap.scrollTop;
+    catalog = next;
+    render();
+    const homeIndex = catalog.folders.findIndex((f) => f.id === homeId);
+    if (homeIndex >= 0) carousel.go(homeIndex, { instant: true });
+    if (folderId === undefined) return true;
+
+    const fi = catalog.folders.findIndex((f) => f.id === folderId);
+    if (fi < 0) {
+      goHome({ animate: false });
+      return false;
+    }
+    const videos = catalog.folders[fi].videos;
+    const vi = videos.findIndex((v) => v.id === videoId);
+    carousel.go(fi, { instant: true });
+    renderFolder(fi, { enter: false });
+    markCurrent(vi >= 0 ? vi : Math.min(Math.max(row, 0), videos.length - 1));
+    listWrap.scrollTop = scroll;
+    if (!player.isOpen) setUrl(fi, -1, { replace: true });
+    return vi >= 0;
   }
 
   // Loop playback: a video that cannot play is skipped. If all the videos in the folder fail
@@ -281,7 +343,7 @@ export function createKiosk({ backend, onExit }) {
   }
 
   function markWatched(vi) {
-    watched.add(`${folderIndex}:${vi}`);
+    watched.add(videoKey(folderIndex, vi));
     const row = $$('.vrow', list)[vi];
     if (row && !$('.watched', row)) $('.thumb', row).append(watchedBadge());
   }
@@ -356,6 +418,10 @@ export function createKiosk({ backend, onExit }) {
       goHome({ reset: true });
       lastAttract = t;
     }
+
+    // A newer catalog waits until nobody has touched the kiosk for a few seconds and no
+    // video is open (a loop takes it between two videos, in playNext).
+    if (pendingCatalog && !player.isOpen && idle >= APPLY_AFTER_IDLE_MS) applyCatalog();
 
     const onHome = folderScreen.hidden && !player.isOpen;
     if (catalog.settings.attractMode && onHome && idle >= ATTRACT_AFTER_MS && t - lastAttract >= ATTRACT_STEP_MS) {
@@ -435,6 +501,8 @@ export function createKiosk({ backend, onExit }) {
     lastInput = performance.now();
     idleResetDone = false;
     timer = setInterval(idleTick, 500);
+    pendingCatalog = null;
+    checkTimer = setInterval(checkCatalog, CATALOG_CHECK_MS);
     syncFullscreen();
     listeners = new AbortController();
     const { signal } = listeners;
@@ -454,6 +522,8 @@ export function createKiosk({ backend, onExit }) {
     endHold();
     if (player.isOpen) player.close('exit');
     clearInterval(timer);
+    clearInterval(checkTimer);
+    pendingCatalog = null;
     root.hidden = true;
     root.classList.remove('hide-cursor');
     watched = new Set();

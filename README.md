@@ -10,6 +10,7 @@ the list at the same place.
 - Themes: **Dark**, **Light**, **GitHub Dark**, **GitHub Light**, **VS Code Dark**, and **VS Code Light**.
 - Closed captions from `.vtt` files, with **CC** and sound on/off buttons in the player.
 - **Play all** and a Loop video playback setting (a folder plays like a playlist), and a **Mute videos** setting.
+- **Video management** on the Azure site: approved GitHub accounts turn videos on or off, edit them, and upload new videos. Changes are versioned and reach the kiosks in about a minute.
 - Touch, mouse, and keyboard: tap or click any folder card, swipe or drag the carousel, or use the arrow keys.
 - Works offline with `npm start`: fonts, icons, and videos are local. It can also run as a
   static site on Azure, with the videos in Blob Storage (see [Deploy to Azure](#deploy-to-azure)).
@@ -177,6 +178,7 @@ Catalog file names end with the month and year they were made, as `<name>-<month
 | `videos[].title`, `description`, `path` | Yes | `path` is a file path or an `http(s)` URL. |
 | `videos[].captions` | No | A `.vtt` file. |
 | `videos[].thumbnail`, `duration` | No | If you omit them, the server makes them with ffmpeg (`npm run azure:catalog` adds them for Azure). |
+| `videos[].enabled` | No | `false` hides the video in the kiosk but keeps it in the catalog. A folder with no videos on is hidden. Default: `true`. |
 
 Relative paths start from the folder that contains the catalog. Validate a catalog with:
 
@@ -317,8 +319,9 @@ push). It does these steps:
    video accepts byte-range requests, so it can stream. Each Azure catalog must have the
    same titles and descriptions as its source catalog (for example `ignite-11-2026.json`).
    This way, the next `npm run azure:catalog` does not remove an edit.
-2. `npm run build:static` builds `dist/`.
-3. On a push to `main` only, the workflow deploys `dist/`. If the deploy fails, it waits
+2. `npm run build:static` builds `dist/`, and `npm run build:api` builds the
+   [Video management](#5-video-management) API in `dist-api/`.
+3. On a push to `main` only, the workflow deploys `dist/` and `dist-api/`. If the deploy fails, it waits
    1 minute and tries one more time.
 4. `npm run check:live` waits until the live site serves the new files (up to 5 minutes).
 
@@ -339,6 +342,70 @@ To deploy without GitHub Actions, run `npm run build:static`, then
 `npx @azure/static-web-apps-cli deploy ./dist --env production --deployment-token <token>`.
 To look at the site locally first, serve `dist/` with any static file server.
 
+### 5. Video management
+
+The **Video management** button on the settings page (at the bottom of **Videos**) opens
+`/manage.html`. People sign in with GitHub. Only the GitHub usernames in the `MANAGERS` app
+setting can use the page. On the page you can:
+
+- Turn each video on or off (the kiosk hides a video that is off), and edit its title and description.
+- **Add video:** pick a kiosk folder, or make a new folder. Then enter a title and a
+  description, and pick a video file (`.mp4`, `.m4v`, or `.webm`, up to 4 GB) and an optional
+  `.vtt` captions file. The browser does the same work as the tools in steps 2 and 3: it
+  moves the MP4 index to the start, reads the length, and makes the thumbnail. Then it
+  uploads the files to the folder's storage folder (for a new folder: `<title> - <description>`).
+- **Publish** the changes. The API validates the catalog and checks each new file. Then it
+  saves a new version. Kiosks check for a new version once a minute. They show it when
+  nobody has touched the kiosk for 5 seconds and no video is open, or between two videos
+  in a loop.
+- **History** lists each version, with who published it and the note. **Restore** loads
+  a version (or the **Repo version** from GitHub) as changes that you can publish.
+  **Download JSON** saves the catalog, for example to commit it to the repo.
+
+Changes stay on the page until you publish them. Uploaded files stay in storage, even if
+you do not publish them.
+
+**The published catalog comes first.** Before the first publish, the kiosks use the catalogs
+in the repo. After it, they use the published catalog in Blob Storage, so a later change to
+a catalog in the repo does not show. To use the repo's catalog again, deploy it, then select
+**History** > **Repo version** > **Restore** and publish.
+
+Set it up one time:
+
+```bash
+# Containers: catalogs (anyone can read; kiosks load them) and catalog-admin (private: drafts and versions)
+az storage container-rm create --storage-account $STORAGE -g $RG -n catalogs --public-access blob
+az storage container-rm create --storage-account $STORAGE -g $RG -n catalog-admin --public-access off
+
+# Let the site's pages upload to the videos container (only with a link from the API)
+SITE=https://$(az staticwebapp show -n $SWA -g $RG --query defaultHostname -o tsv)
+az storage account blob-service-properties cors-rule add --account-name $STORAGE -g $RG \
+  --allowed-origins $SITE --allowed-methods PUT OPTIONS --allowed-headers "*" \
+  --exposed-headers ETag x-ms-error-code x-ms-request-id --max-age 3600
+
+# App settings for the API: the storage connection and the approved GitHub usernames
+az staticwebapp appsettings set -n $SWA -g $RG --setting-names \
+  STORAGE_CONNECTION_STRING="$(az storage account show-connection-string -n $STORAGE -g $RG -o tsv)" \
+  MANAGERS="danwahlin,katiesavage"
+```
+
+Set `liveCatalogs` in `static-site.json` to `https://<storage account>.blob.core.windows.net/catalogs`.
+To add or remove a person, change `MANAGERS` (comma-separated GitHub usernames) with the
+same `appsettings set` command. The change applies at once. The API can also use other
+container names: set `VIDEOS_CONTAINER`, `CATALOGS_CONTAINER`, and `ADMIN_CONTAINER`.
+
+To run it locally, build both parts, start the API with
+[Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
+(put the app settings in `dist-api/local.settings.json`), then start the
+[Static Web Apps CLI](https://learn.microsoft.com/azure/static-web-apps/static-web-apps-cli-overview),
+which shows a test sign-in form:
+
+```bash
+npm run build:static && npm run build:api && npm ci --omit=dev --prefix dist-api
+(cd dist-api && func start --port 7071)
+npx @azure/static-web-apps-cli start dist --api-devserver-url http://localhost:7071 --port 4280
+```
+
 **Costs:** the Free plan of Static Web Apps costs nothing. Blob Storage costs about $0.02 per GB
 a month to store, and about $0.08 per GB that viewers watch after the first 100 GB a month.
 
@@ -353,12 +420,32 @@ On the static site, anyone with the site's address can open the settings page, b
 settings are saved only in that browser. The Blob Storage container allows anonymous read
 access, so anyone with a video's URL can watch it. Do not upload videos that must stay private.
 
+Video management:
+
+- **Sign-in.** Static Web Apps lets only signed-in people open `/manage.html` and call
+  `/api/manage/*`. Only GitHub sign-in is on. The API also checks that the GitHub username
+  is in `MANAGERS`, for each request. Remove a person from `MANAGERS` when they no longer
+  need access, because a GitHub username can later belong to someone else.
+- **Requests.** A change must be JSON and have the `X-Kiosk-Manage` header, so a page on
+  another site cannot make a change with your sign-in. The page has a strict
+  Content Security Policy and cannot be shown in a frame on another site.
+- **Uploads.** The browser uploads straight to Blob Storage with a link from the API. Each
+  link is for one new file name, can only create that file, works over HTTPS only, and
+  expires after 60 minutes. The browser cannot read the account key.
+- **Publishing.** The API validates the catalog against the schema. Each new video,
+  captions, or thumbnail URL must be in the videos container and answer with the correct
+  content type, and each icon must be an Octicon name or a logo in `catalogs/assets`. A
+  publish stops if someone else published after you opened the catalog, so no change is
+  lost. Every version stays in the private `catalog-admin` container.
+- **Secrets.** The storage connection string is only in the Static Web App's app settings,
+  not in the repo or the browser.
+
 ## Project structure
 
 ```
 server.js                    Express server and API (npm start)
 lib/                         Catalog validation, folder mode, ffmpeg media, settings, icons, QuickXorHash
-public/                      Settings page and kiosk (HTML, CSS, JavaScript modules)
+public/                      Settings page, kiosk, and Video management page (HTML, CSS, JavaScript modules)
 schema/                      Catalog JSON schema
 catalogs/                    Catalogs (<name>-<month>-<year>.json) and logo assets
 static-site.json             Catalogs, media version, and default settings for the static site
@@ -367,6 +454,8 @@ tools/sharepoint-catalog.js  Builds a catalog from a SharePoint listing and the 
 tools/azure-catalog.js       Copies a catalog with Blob Storage URLs and thumbnails (npm run azure:catalog)
 tools/faststart.js           Copies MP4s with the index moved to the start (npm run azure:faststart)
 tools/build-static.js        Builds the static site in dist/ (npm run build:static)
+tools/build-api.js           Builds the Video management API in dist-api/ (npm run build:api)
+api/                         Video management API (Azure Functions for Static Web Apps)
 tools/check-catalogs.js      Checks the site's catalogs and media URLs before a deploy (npm run check)
 tools/check-live.js          Checks that the live site serves the new build (npm run check:live)
 .github/workflows/           Checks each pull request; deploys the static site to Azure on each push to main
@@ -374,7 +463,7 @@ tools/check-live.js          Checks that the live site serves the new build (npm
 docs/images/                 README screenshots
 videos/                      Your video files (not in Git)
 data/                        Local settings and the thumbnail cache (not in Git)
-dist/                        The static site build (not in Git)
+dist/, dist-api/             The static site and API builds (not in Git)
 ```
 
 The GitHub Invertocat files in `catalogs/assets/` come from the

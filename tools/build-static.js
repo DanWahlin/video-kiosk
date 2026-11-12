@@ -63,12 +63,40 @@ for (const file of files) {
 
 // Each browser starts with these settings and can change them on the settings page.
 const defaults = kioskSettings(normalizeSettings(site.defaults));
-writeJson('kiosk.config.json', { themes: THEMES, idleChoices: IDLE_CHOICES, captionSizes: CAPTION_SIZES, defaults, catalogs });
+// liveCatalogs: where Video management publishes the catalogs (see api/). The kiosk loads a
+// published catalog first, and the copy in this build if there is none.
+const liveCatalogs = process.env.LIVE_CATALOGS ?? site.liveCatalogs ?? null;
+writeJson('kiosk.config.json', { themes: THEMES, idleChoices: IDLE_CHOICES, captionSizes: CAPTION_SIZES, defaults, catalogs, liveCatalogs, mediaVersion: site.mediaVersion ?? null });
+
+// Video management: only people signed in with GitHub can open the page or call the API,
+// and the API also checks the MANAGERS app setting. The other sign-in providers are off.
+const storageOrigin = liveCatalogs ? new URL(liveCatalogs).origin : '';
+const manageCsp = [
+  "default-src 'self'",
+  `connect-src 'self' ${storageOrigin}`,
+  `img-src 'self' data: blob: ${storageOrigin}`,
+  `media-src 'self' blob: ${storageOrigin}`,
+  "style-src 'self'",
+  "script-src 'self'",
+  "object-src 'none'",
+  "base-uri 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+].join('; ');
 writeJson('staticwebapp.config.json', {
-  globalHeaders: { 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin' },
+  platform: { apiRuntime: 'node:22' },
+  globalHeaders: { 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'X-Frame-Options': 'DENY' },
   routes: [
+    { route: '/.auth/login/aad', statusCode: 404 },
+    { route: '/.auth/login/twitter', statusCode: 404 },
+    { route: '/manage', redirect: '/manage.html', statusCode: 302 },
+    { route: '/manage.html', allowedRoles: ['authenticated'], headers: { 'Cache-Control': 'no-store', 'Content-Security-Policy': manageCsp } },
+    { route: '/api/manage/*', allowedRoles: ['authenticated'] },
     { route: '/kiosk.config.json', headers: { 'Cache-Control': 'no-cache' } },
     { route: '/catalogs/*.json', headers: { 'Cache-Control': 'no-cache' } },
   ],
+  responseOverrides: {
+    401: { redirect: '/.auth/login/github?post_login_redirect_uri=/manage.html', statusCode: 302 },
+  },
 });
 console.log(`Built ${path.relative(ROOT, DIST)}/ with ${catalogs.map((c) => `${c.title} (${c.summary.videos} videos)`).join(', ')}`);
