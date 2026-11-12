@@ -546,6 +546,7 @@ dialog.browser::backdrop {
   border-top: 1px solid var(--pill-border);
 }
 .manage-link .hint {
+  margin: 0;
   font-size: 14px;
   color: var(--text-2);
 }
