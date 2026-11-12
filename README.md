@@ -394,7 +394,8 @@ To add or remove a person, change `MANAGERS` (comma-separated GitHub usernames) 
 same `appsettings set` command. The change applies at once. The API can also use other
 container names: set `VIDEOS_CONTAINER`, `CATALOGS_CONTAINER`, and `ADMIN_CONTAINER`.
 
-To run it locally, build both parts, start the API with
+To run it locally, add `http://localhost:4280` to the PUT CORS rule's origins (remove it
+again when you are done), build both parts, start the API with
 [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
 (put the app settings in `dist-api/local.settings.json`), then start the
 [Static Web Apps CLI](https://learn.microsoft.com/azure/static-web-apps/static-web-apps-cli-overview),
