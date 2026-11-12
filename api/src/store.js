@@ -250,7 +250,8 @@ export async function getVersion(name, id) {
 
 // ---- Uploads ----
 // The browser uploads straight to Blob Storage with a short-lived link for each new file.
-// A link can only create its one file (it cannot read, list, delete, or replace files).
+// A link has only the Create permission for its one file name: it can upload a new file
+// (in blocks, too), but it cannot read, list, delete, or replace a file.
 const slug = (s) =>
   String(s)
     .normalize('NFKD')
@@ -274,7 +275,8 @@ export async function createUpload({ folder, fileName, size, captions }) {
   if (!(Number.isFinite(size) && size > 0 && size <= MAX_VIDEO_BYTES)) throw new HttpError(400, 'The video must be smaller than 4 GB.');
 
   const { videos, videosBase, credential } = storage();
-  const stem = slug(path.basename(String(fileName), ext));
+  const base = path.basename(String(fileName));
+  const stem = slug(base.slice(0, base.length - ext.length));
   let name = stem;
   const taken = async (n) =>
     (await Promise.all([`${folder}/${n}${ext}`, `thumbnails/${folder}/${n}.jpg`, `${folder}/${n}.vtt`].map((b) => videos.getBlockBlobClient(b).exists()))).some(Boolean);
@@ -284,7 +286,7 @@ export async function createUpload({ folder, fileName, size, captions }) {
   const expiresOn = new Date(Date.now() + UPLOAD_MINUTES * 60_000);
   const link = (blobName, contentType) => {
     const sas = generateBlobSASQueryParameters(
-      { containerName: videos.containerName, blobName, permissions: BlobSASPermissions.parse('cw'), startsOn, expiresOn, protocol: SASProtocol.Https },
+      { containerName: videos.containerName, blobName, permissions: BlobSASPermissions.parse('c'), startsOn, expiresOn, protocol: SASProtocol.Https },
       credential,
     ).toString();
     const url = `${videosBase}/${blobName.split('/').map(encodeURIComponent).join('/')}`;

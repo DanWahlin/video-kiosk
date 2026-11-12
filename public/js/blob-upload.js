@@ -17,7 +17,9 @@ async function put(url, body, headers, signal) {
     if (res?.ok) return;
     if (res && res.status < 500 && res.status !== 408 && res.status !== 429) {
       const code = res.headers.get('x-ms-error-code') ?? '';
-      throw new Error(code === 'BlobAlreadyExists' ? 'A file with this name is already in storage.' : res.status === 403 ? 'The upload link is not valid any more. Try again.' : `Blob Storage refused the upload (HTTP ${res.status} ${code}).`);
+      // The link can only create a new file, so a file that is already there gives 403 (or 409).
+      const exists = code === 'BlobAlreadyExists' || code === 'UnauthorizedBlobOverwrite' || res.status === 409 || res.status === 412;
+      throw new Error(exists ? 'A file with this name is already in storage. Try the upload again to get a new name.' : res.status === 403 ? 'The upload link is not valid any more (it expires after 60 minutes). Try again.' : `Blob Storage refused the upload (HTTP ${res.status} ${code}).`);
     }
     if (res && attempt >= TRIES) throw new Error(`Blob Storage did not accept the upload (HTTP ${res.status}). Try again.`);
     await new Promise((r) => setTimeout(r, attempt * 1500));
