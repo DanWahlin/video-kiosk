@@ -555,6 +555,11 @@
           "title": "Write and Optimize PostgreSQL Queries Faster in VS",
           "description": "A video in the VS Code booth folder: Write and Optimize PostgreSQL Queries Faster in VS. The title and this description come from the file name.",
           "path": "../videos/Visual Studio & VS Code - AI-powered development, built in/Write-and-Optimize-PostgreSQL-Queries-Faster-in-VS.mp4"
+        },
+        {
+          "title": "Using GitHub Copilot to auto fix NuGet package vulnerabilities",
+          "description": "Learn how to use GitHub Copilot in Visual Studio to auto fix NuGet package vulnerabilities.",
+          "path": "../videos/Visual Studio & VS Code - AI-powered development, built in/VS-copilot-fix-nuget-vulnerabilities.mp4"
         }
       ]
     }

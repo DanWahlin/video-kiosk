@@ -743,6 +743,13 @@
           "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/Write-and-Optimize-PostgreSQL-Queries-Faster-in-VS.mp4",
           "duration": 360.28,
           "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/Write-and-Optimize-PostgreSQL-Queries-Faster-in-VS.jpg"
+        },
+        {
+          "title": "Using GitHub Copilot to auto fix NuGet package vulnerabilities",
+          "description": "Learn how to use GitHub Copilot in Visual Studio to auto fix NuGet package vulnerabilities.",
+          "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/VS-copilot-fix-nuget-vulnerabilities.mp4",
+          "duration": 56.84,
+          "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/VS-copilot-fix-nuget-vulnerabilities.jpg"
         }
       ]
     }
