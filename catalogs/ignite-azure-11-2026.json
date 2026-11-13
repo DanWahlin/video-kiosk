@@ -592,20 +592,6 @@
           "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/question-visual-studio-agent-skills.jpg"
         },
         {
-          "title": "Question: A VS Code Agent Host session is running. What happens when a second window connects to that session?",
-          "description": "An animated multiple-choice quiz about Visual Studio / VS Code. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. While the Agent Host runs, multiple connected clients share the same session state.",
-          "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/question-vscode-shared-agent-session.mp4",
-          "duration": 35.57,
-          "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/question-vscode-shared-agent-session.jpg"
-        },
-        {
-          "title": "Question: You delegate research to a subagent in VS Code's Local session target. What context should you send?",
-          "description": "An animated multiple-choice quiz about Visual Studio / VS Code. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Local subagents do not inherit the main conversation. Send a self-contained assignment.",
-          "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/question-vscode-subagent-context.mp4",
-          "duration": 35.57,
-          "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/question-vscode-subagent-context.jpg"
-        },
-        {
           "title": "Visual Studio: Review GitHub Pull Requests",
           "description": "A narrated explainer video. Review a GitHub pull request from start to end in Visual Studio, and add it to a Copilot chat, without leaving the IDE.",
           "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/review-gh-pr-vs.mp4",
@@ -661,6 +647,13 @@
           "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/vs-text-visualizer-search.jpg"
         },
         {
+          "title": "Question: A VS Code Agent Host session is running. What happens when a second window connects to that session?",
+          "description": "An animated multiple-choice quiz about Visual Studio / VS Code. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. While the Agent Host runs, multiple connected clients share the same session state.",
+          "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/question-vscode-shared-agent-session.mp4",
+          "duration": 35.57,
+          "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/question-vscode-shared-agent-session.jpg"
+        },
+        {
           "title": "Agent Bake Off",
           "description": "",
           "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/Agent%20Bake%20Off.mp4",
@@ -708,6 +701,13 @@
           "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/Get-Started-with-PostgreSQL-in-VS-Code.mp4",
           "duration": 190.2,
           "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/Get-Started-with-PostgreSQL-in-VS-Code.jpg"
+        },
+        {
+          "title": "Question: You delegate research to a subagent in VS Code's Local session target. What context should you send?",
+          "description": "An animated multiple-choice quiz about Visual Studio / VS Code. It shows the question and answers, reveals the correct answer, and ends with a QR code to the docs. Local subagents do not inherit the main conversation. Send a self-contained assignment.",
+          "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/question-vscode-subagent-context.mp4",
+          "duration": 35.57,
+          "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/question-vscode-subagent-context.jpg"
         },
         {
           "title": "Integrated Browser",
