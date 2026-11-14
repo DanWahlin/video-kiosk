@@ -5,7 +5,7 @@
     "catalogs/ignite-azure-11-2026.json"
   ],
   "liveCatalogs": "https://ghuniverseroadtrip.blob.core.windows.net/catalogs",
-  "mediaVersion": 3,
+  "mediaVersion": 4,
   "defaults": {
     "theme": "github-dark",
     "idleSeconds": 120,
