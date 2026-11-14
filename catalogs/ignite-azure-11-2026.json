@@ -750,6 +750,13 @@
           "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/VS-copilot-fix-nuget-vulnerabilities.mp4",
           "duration": 56.84,
           "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/VS-copilot-fix-nuget-vulnerabilities.jpg"
+        },
+        {
+          "title": "VS Code: connectors",
+          "description": "A captioned demo of connectors in VS Code. Run Chat: Open Customizations to add a connector such as Slack, and authorize it one time. Then Copilot finds a Slack thread about new features and adds recurring and scheduled tasks to a to-do app.",
+          "path": "https://ghuniverseroadtrip.blob.core.windows.net/videos/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/vs-code-connectors.mp4",
+          "duration": 135.43,
+          "thumbnail": "https://ghuniverseroadtrip.blob.core.windows.net/videos/thumbnails/Visual%20Studio%20%26%20VS%20Code%20-%20AI-powered%20development%2C%20built%20in/vs-code-connectors.jpg"
         }
       ]
     }

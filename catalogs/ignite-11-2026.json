@@ -560,6 +560,11 @@
           "title": "Using GitHub Copilot to auto fix NuGet package vulnerabilities",
           "description": "Learn how to use GitHub Copilot in Visual Studio to auto fix NuGet package vulnerabilities.",
           "path": "../videos/Visual Studio & VS Code - AI-powered development, built in/VS-copilot-fix-nuget-vulnerabilities.mp4"
+        },
+        {
+          "title": "VS Code: connectors",
+          "description": "A captioned demo of connectors in VS Code. Run Chat: Open Customizations to add a connector such as Slack, and authorize it one time. Then Copilot finds a Slack thread about new features and adds recurring and scheduled tasks to a to-do app.",
+          "path": "../videos/Visual Studio & VS Code - AI-powered development, built in/vs-code-connectors.mp4"
         }
       ]
     }
